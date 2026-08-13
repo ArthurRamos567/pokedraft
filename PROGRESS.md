@@ -25,7 +25,7 @@ move to the next task.
 - [ ] 1.9 CORS + OpenAPI plugins
 - [ ] 1.10 Better Auth instance, Drizzle adapter, auth tables committed to `packages/db` + migration
 - [ ] 1.11 Better Auth config: email/password, `user.additionalFields` (displayName, showdownUsername, avatarUrl), session settings
-- [ ] 1.12 Social providers (Discord, Google) — inert without env vars ⛔ see BLOCKERS
+- [ ] 1.12 Social providers built conditionally from env (see phase plan); `GET /api/auth/providers` lists enabled ones. Blank vars must not throw
 - [ ] 1.13 `authMacro` + protected route; 401 test with and without cookie
 - [ ] 1.14 Eden Treaty test harness against `app.handle()`, no network
 - [ ] 1.15 `audit_log` and `notifications` tables + service (used from phase 3 on)

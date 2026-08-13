@@ -1,7 +1,7 @@
 # Blockers
 
-Questions an agent cannot answer alone. Append here, skip the task, keep going.
-Never guess and build on the guess.
+Questions an agent cannot answer alone. Append here, mark the PROGRESS.md task
+`⛔`, skip it, keep going. Never guess and build on the guess.
 
 Format:
 
@@ -14,11 +14,11 @@ Format:
 
 ---
 
-## [phase-01] OAuth credentials
+None open.
 
-**Task:** 1.12 Better Auth social providers
-**Question:** Discord and Google client IDs/secrets need to be registered by a
-human at the provider consoles and put in `.env`.
-**Assumed for now:** email/password enabled and working; social providers
-configured in code but inert without the env vars. `.env.example` documents
-every key.
+Resolved:
+
+- **OAuth credentials (phase 1)** — no longer blocking. Providers are built
+  conditionally from env, so blank credentials mean the provider isn't
+  registered and email/password carries development. Real credentials are a
+  later, optional step.
