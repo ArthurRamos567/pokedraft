@@ -34,19 +34,19 @@ move to the next task.
 
 ## Phase 2 — Dex layer · [plan](plans/phase-02-dex.md)
 
-- [ ] 2.1 `packages/dex` scaffold, `@pkmn/{dex,data,sim,img,sets}` deps
-- [ ] 2.2 `gens.ts` — memoized `Generations` per gen
-- [ ] 2.3 `species.ts` — lookup + boot indices, lazy per format
-- [ ] 2.4 Name resolver: `toID` → aliases (seed from `DraftMVP/tools/scrape/aliases.json`) → forme normalization → fuzzy **as suggestion only**, with tests
-- [ ] 2.5 Forme handling: cosmetic collapse vs. functional distinct, with tests
-- [ ] 2.6 `formats.ts` — format list, `RuleTable`, curated `SUPPORTED_FORMATS`
-- [ ] 2.7 `legality.ts` + tests (banned in gen9ou, legal in gen9ubers, gen boundaries)
-- [ ] 2.8 Species-count-per-format snapshot test (catches silent `@pkmn` upgrades)
-- [ ] 2.9 `learnsets.ts` — move pool per species per format
-- [ ] 2.10 `sprites.ts` — `@pkmn/img` URL builders
-- [ ] 2.11 `coverage.ts` — generation-aware type chart math + tests
-- [ ] 2.12 `modules/dex` routes: formats, species search, species detail, learnset, moves, abilities
-- [ ] 2.13 `POST /dex/resolve` batch endpoint + cache headers
+- [x] 2.1 `packages/dex` scaffold, `@pkmn/{dex,data,sim,img,sets}` deps
+- [x] 2.2 `gens.ts` — memoized `Generations` per gen
+- [x] 2.3 `species.ts` — lookup + boot indices, lazy per format
+- [x] 2.4 Name resolver: `toID` → aliases (seed from `DraftMVP/tools/scrape/aliases.json`) → forme normalization → fuzzy **as suggestion only**, with tests
+- [x] 2.5 Forme handling: cosmetic collapse vs. functional distinct, with tests
+- [x] 2.6 `formats.ts` — format list, `RuleTable`, curated `SUPPORTED_FORMATS`
+- [x] 2.7 `legality.ts` + tests (banned in gen9ou, legal in gen9ubers, gen boundaries)
+- [x] 2.8 Species-count-per-format snapshot test (catches silent `@pkmn` upgrades)
+- [x] 2.9 `learnsets.ts` — move pool per species per format
+- [x] 2.10 `sprites.ts` — `@pkmn/img` URL builders
+- [x] 2.11 `coverage.ts` — generation-aware type chart math + tests
+- [x] 2.12 `modules/dex` routes: formats, species search, species detail, learnset, moves, abilities
+- [x] 2.13 `POST /dex/resolve` batch endpoint + cache headers
 
 ## Phase 3 — Leagues & points · [plan](plans/phase-03-leagues.md)
 

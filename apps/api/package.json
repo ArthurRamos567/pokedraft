@@ -17,6 +17,7 @@
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "^1.4.0",
     "@pokedraft/db": "workspace:*",
+    "@pokedraft/dex": "workspace:*",
     "@pokedraft/shared": "workspace:*",
     "@sinclair/typebox": "^0.34.52",
     "better-auth": "^1.4.0",

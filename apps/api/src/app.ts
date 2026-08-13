@@ -2,6 +2,7 @@ import { cors } from '@elysiajs/cors'
 import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
 import { env } from './env'
+import { dexModule } from './modules/dex'
 import { healthModule } from './modules/health'
 import { meModule } from './modules/me'
 import { notificationsModule } from './modules/system'
@@ -26,7 +27,10 @@ export const app = new Elysia()
       path: '/openapi',
       documentation: {
         info: { title: 'PokeDraft API', version: '0.1.0' },
-        tags: [{ name: 'health', description: 'Liveness and readiness' }],
+        tags: [
+          { name: 'health', description: 'Liveness and readiness' },
+          { name: 'dex', description: 'Pokemon reference data' },
+        ],
       },
     }),
   )
@@ -34,6 +38,7 @@ export const app = new Elysia()
   .use(loggerPlugin)
   .use(authPlugin)
   .use(healthModule)
+  .use(dexModule)
   .use(meModule)
   .use(notificationsModule)
 

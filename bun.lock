@@ -18,6 +18,7 @@
         "@elysiajs/cors": "^1.4.0",
         "@elysiajs/openapi": "^1.4.0",
         "@pokedraft/db": "workspace:*",
+        "@pokedraft/dex": "workspace:*",
         "@pokedraft/shared": "workspace:*",
         "@sinclair/typebox": "^0.34.52",
         "better-auth": "^1.4.0",
@@ -35,6 +36,17 @@
       "dependencies": {
         "drizzle-orm": "^0.44.7",
         "postgres": "^3.4.7",
+      },
+    },
+    "packages/dex": {
+      "name": "@pokedraft/dex",
+      "version": "0.0.0",
+      "dependencies": {
+        "@pkmn/data": "^0.10.11",
+        "@pkmn/dex": "^0.10.11",
+        "@pkmn/img": "^0.3.4",
+        "@pkmn/sets": "^5.2.0",
+        "@pkmn/sim": "^0.10.11",
       },
     },
     "packages/shared": {
@@ -157,9 +169,27 @@
 
     "@pinojs/redact": ["@pinojs/redact@0.4.0", "", {}, "sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg=="],
 
+    "@pkmn/data": ["@pkmn/data@0.10.11", "", { "dependencies": { "@pkmn/dex-types": "^0.10.11" } }, "sha512-WZiOOZEdIJybC1M2EJVazx+OKH5Hh544cPhNnjgNjn3B0LORP82YkL4jpZqkww+NoIHIXMvJBYLKg3GZBNm4kQ=="],
+
+    "@pkmn/dex": ["@pkmn/dex@0.10.11", "", { "dependencies": { "@pkmn/dex-types": "^0.10.11" } }, "sha512-htR2Etf3WCiu4k4ukmyYD94do97sTm9LfmxJ8tg2uuPGJsZ98ZZGlJFUZNltfXU0pO61ItiU6obRXTw05qipDQ=="],
+
+    "@pkmn/dex-types": ["@pkmn/dex-types@0.10.11", "", { "dependencies": { "@pkmn/types": "^4.0.0" } }, "sha512-6hvvi/iHCdBbUGK7RmWPCKuZGujEC+1elvxcLK2BpL/j7Q0roSuC33xrodDsyg2EuyJ5szGunzRtFztyrtb7aQ=="],
+
+    "@pkmn/img": ["@pkmn/img@0.3.4", "", {}, "sha512-N1mdujeBb9pGEooc42arzv84Q5zK7lUd5FL/xVEQHJ2tjwJthchTTfMzBgr4AXIDTxAf1XfmGr0pH2ynbYbUyQ=="],
+
+    "@pkmn/sets": ["@pkmn/sets@5.2.0", "", { "dependencies": { "@pkmn/types": "^4.0.0" } }, "sha512-WHAW6bZu0WCo/3b+LTW7BE0fBhYZnWH1lCXIu2an8/wTiZ/+s1eTcQYj7W/YQKxWT5dm/La03AZ6CeqdJip9CQ=="],
+
+    "@pkmn/sim": ["@pkmn/sim@0.10.11", "", { "dependencies": { "@pkmn/sets": "^5.2.0", "@pkmn/streams": "^1.1.0", "ts-chacha20": "^1.2.0" } }, "sha512-v45jqIgFnEB3hc7e97QlWDnfkIef6mfZ0WjWHWw+f21cYyksGVLzxIEulR9xuOazeszA+ycDx6O6B3JOJAS5Xg=="],
+
+    "@pkmn/streams": ["@pkmn/streams@1.1.0", "", {}, "sha512-Pp9k7gt4xd76DqTU+LQEUyzuaauM4bV1MlehVtX1NS7o9zMFtjw50MfaEQ62dIMZyzxNjsJGoLGBeY1iSYLsRA=="],
+
+    "@pkmn/types": ["@pkmn/types@4.0.0", "", {}, "sha512-gR2s/pxJYEegek1TtsYCQupNR3d5hMlcJFsiD+2LyfKr4tc+gETTql47tWLX5mFSbPcbXh7f4+7txlMIDoZx/g=="],
+
     "@pokedraft/api": ["@pokedraft/api@workspace:apps/api"],
 
     "@pokedraft/db": ["@pokedraft/db@workspace:packages/db"],
+
+    "@pokedraft/dex": ["@pokedraft/dex@workspace:packages/dex"],
 
     "@pokedraft/shared": ["@pokedraft/shared@workspace:packages/shared"],
 
@@ -326,6 +356,8 @@
     "thread-stream": ["thread-stream@3.2.0", "", { "dependencies": { "real-require": "^0.2.0" } }, "sha512-zLBvqpwr4Esa0kRjcrzGU6zL25lePWaCLMx0RQFrmteozIfeNdaMLpG5U7PeHzvlFkAWaRKA9/KVW4F60iB+qw=="],
 
     "token-types": ["token-types@6.1.2", "", { "dependencies": { "@borewit/text-codec": "^0.2.1", "@tokenizer/token": "^0.3.0", "ieee754": "^1.2.1" } }, "sha512-dRXchy+C0IgK8WPC6xvCHFRIWYUbqqdEIKPaKo/AcTUNzwLTK6AH7RjdLWsEZcAN/TBdtfUw3PYEgPr5VPr6ww=="],
+
+    "ts-chacha20": ["ts-chacha20@1.2.0", "", {}, "sha512-PTyPoWYHc2we8P2NTn5hpYG211popWbkjiw+k63xqjeMrx9pPtXSclz9F3fu0Tpr+vfR1xxcQFwsEkh1cXMLqw=="],
 
     "tsx": ["tsx@4.23.12", "", { "dependencies": { "esbuild": "~0.28.0" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q=="],
 
