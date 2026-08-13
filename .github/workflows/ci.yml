@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: pokedraft
+          POSTGRES_PASSWORD: pokedraft
+          POSTGRES_DB: pokedraft
+        ports: ['5442:5432']
+        options: >-
+          --health-cmd "pg_isready -U pokedraft"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://pokedraft:pokedraft@localhost:5442/pokedraft
+      BETTER_AUTH_SECRET: ci-secret-not-used-anywhere-else
+      BETTER_AUTH_URL: http://localhost:3000
+      WEB_ORIGIN: http://localhost:5173
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+      - run: bun run db:migrate
+      - run: bun run typecheck
+      - run: bun run lint
+      - run: bun run test

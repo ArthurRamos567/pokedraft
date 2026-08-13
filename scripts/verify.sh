@@ -26,7 +26,7 @@ fi
 
 run typecheck bun run typecheck
 run lint      bun run lint
-run test      bun test
+run test      bun run test
 
 if ((${#failed[@]})); then
   echo "FAILED: ${failed[*]}"

@@ -14,23 +14,23 @@ move to the next task.
 
 ## Phase 1 — Scaffold & auth · [plan](plans/phase-01-scaffold.md)
 
-- [ ] 1.1 Root `package.json` (bun workspaces), `tsconfig.base.json` (strict, `@pokedraft/*` paths), workspace stubs
-- [ ] 1.2 Biome config, `typecheck`/`lint`/`test`/`dev` scripts, `.env.example`
-- [ ] 1.3 `packages/shared`: error code constants, shared typebox helpers
-- [ ] 1.4 `packages/db`: drizzle config, postgres.js client, `db:generate` / `db:migrate` scripts
-- [ ] 1.5 `apps/api/src/env.ts` — typebox-validated env, aggregate failure message
-- [ ] 1.6 `apps/api`: `app.ts` (exported instance) + `index.ts`, `/health` and `/ready` modules
-- [ ] 1.7 Errors plugin — `onError` → `{ error: { code, message, details } }`, domain error classes
-- [ ] 1.8 Logger plugin (pino) with requestId/userId binding
-- [ ] 1.9 CORS + OpenAPI plugins
-- [ ] 1.10 Better Auth instance, Drizzle adapter, auth tables committed to `packages/db` + migration
-- [ ] 1.11 Better Auth config: email/password, `user.additionalFields` (displayName, showdownUsername, avatarUrl), session settings
-- [ ] 1.12 Social providers built conditionally from env (see phase plan); `GET /api/auth/providers` lists enabled ones. Blank vars must not throw
-- [ ] 1.13 `authMacro` + protected route; 401 test with and without cookie
-- [ ] 1.14 Eden Treaty test harness against `app.handle()`, no network
-- [ ] 1.15 `audit_log` and `notifications` tables + service (used from phase 3 on)
-- [ ] 1.16 Rate limiting on auth routes
-- [ ] 1.17 GitHub Actions CI: install → typecheck → lint → test
+- [x] 1.1 Root `package.json` (bun workspaces), `tsconfig.base.json` (strict, `@pokedraft/*` paths), workspace stubs
+- [x] 1.2 Biome config, `typecheck`/`lint`/`test`/`dev` scripts, `.env.example`
+- [x] 1.3 `packages/shared`: error code constants, shared typebox helpers
+- [x] 1.4 `packages/db`: drizzle config, postgres.js client, `db:generate` / `db:migrate` scripts
+- [x] 1.5 `apps/api/src/env.ts` — typebox-validated env, aggregate failure message
+- [x] 1.6 `apps/api`: `app.ts` (exported instance) + `index.ts`, `/health` and `/ready` modules
+- [x] 1.7 Errors plugin — `onError` → `{ error: { code, message, details } }`, domain error classes
+- [x] 1.8 Logger plugin (pino) with requestId/userId binding
+- [x] 1.9 CORS + OpenAPI plugins
+- [x] 1.10 Better Auth instance, Drizzle adapter, auth tables committed to `packages/db` + migration
+- [x] 1.11 Better Auth config: email/password, `user.additionalFields` (displayName, showdownUsername, avatarUrl), session settings
+- [x] 1.12 Social providers built conditionally from env (see phase plan); `GET /api/auth/providers` lists enabled ones. Blank vars must not throw
+- [x] 1.13 `authMacro` + protected route; 401 test with and without cookie
+- [x] 1.14 Eden Treaty test harness against `app.handle()`, no network
+- [x] 1.15 `audit_log` and `notifications` tables + service (used from phase 3 on)
+- [x] 1.16 Rate limiting on auth routes
+- [x] 1.17 GitHub Actions CI: install → typecheck → lint → test
 
 ## Phase 2 — Dex layer · [plan](plans/phase-02-dex.md)
 

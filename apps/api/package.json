@@ -1,0 +1,30 @@
+{
+  "name": "@pokedraft/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/app.ts",
+  "types": "./src/app.ts",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/openapi": "^1.4.0",
+    "@pokedraft/db": "workspace:*",
+    "@pokedraft/shared": "workspace:*",
+    "@sinclair/typebox": "^0.34.52",
+    "better-auth": "^1.4.0",
+    "elysia": "^1.4.0",
+    "pino": "^9.13.1"
+  },
+  "devDependencies": {
+    "@elysiajs/eden": "^1.4.9",
+    "pino-pretty": "^13.1.2"
+  }
+}

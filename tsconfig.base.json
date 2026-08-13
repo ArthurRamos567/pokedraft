@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "types": ["bun"],
+
+    "paths": {
+      "@pokedraft/shared": ["./packages/shared/src/index.ts"],
+      "@pokedraft/shared/*": ["./packages/shared/src/*"],
+      "@pokedraft/db": ["./packages/db/src/index.ts"],
+      "@pokedraft/db/*": ["./packages/db/src/*"],
+      "@pokedraft/dex": ["./packages/dex/src/index.ts"],
+      "@pokedraft/dex/*": ["./packages/dex/src/*"],
+      "@pokedraft/draft": ["./packages/draft/src/index.ts"],
+      "@pokedraft/draft/*": ["./packages/draft/src/*"],
+      "@pokedraft/season": ["./packages/season/src/index.ts"],
+      "@pokedraft/season/*": ["./packages/season/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".output", "DraftMVP"]
+}

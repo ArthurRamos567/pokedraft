@@ -16,6 +16,13 @@ phases — the league shell can exist as soon as phase 3 lands.
 | Tables | TanStack Table (points list, standings, pool browser) |
 | Styling | Tailwind + a small hand-rolled component layer |
 
+## Dev ports
+
+The web dev server binds **5173**, from `WEB_PORT`. TanStack Start's vite dev
+server defaults to 3000, which the API already owns, so `vite.config.ts` sets
+`server.port` (and `preview.port`) explicitly — no default fallback to 3000.
+`WEB_ORIGIN` on the API side must match, or CORS and auth cookies break.
+
 Eden + Query is the pairing that earns TanStack here: `queryFn` calls
 `api.leagues({id}).teams.get()` and the response type is the server's response
 type, with no generated client and no drift.
