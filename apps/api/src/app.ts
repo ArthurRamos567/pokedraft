@@ -3,6 +3,7 @@ import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
 import { env } from './env'
 import { dexModule } from './modules/dex'
+import { draftModule } from './modules/draft'
 import { healthModule } from './modules/health'
 import { leaguesModule } from './modules/leagues'
 import { meModule } from './modules/me'
@@ -11,6 +12,7 @@ import { notificationsModule } from './modules/system'
 import { authPlugin } from './plugins/auth'
 import { errorsPlugin } from './plugins/errors'
 import { loggerPlugin } from './plugins/logger'
+import { realtimeModule } from './realtime'
 
 /**
  * Exported without listening so tests can call `app.handle(new Request(…))`
@@ -43,6 +45,8 @@ export const app = new Elysia()
   .use(dexModule)
   .use(leaguesModule)
   .use(pointsModule)
+  .use(draftModule)
+  .use(realtimeModule)
   .use(meModule)
   .use(notificationsModule)
 

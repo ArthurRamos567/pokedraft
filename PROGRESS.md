@@ -67,22 +67,22 @@ move to the next task.
 
 ## Phase 4 — Draft engine & room · [plan](plans/phase-04-draft.md)
 
-- [ ] 4.1 `packages/draft` types: `DraftConfig`, `DraftState`, `DraftEvent`, `Pick`
-- [ ] 4.2 `order.ts` — snake + linear, finished teams skipped, tests for 4/6/8/odd
-- [ ] 4.3 `reduce.ts` — total `apply()`, typed `InvalidEvent`
-- [ ] 4.4 `validate.ts` — the 8 ordered checks including **roster reachability**, tests at the boundary
-- [ ] 4.5 `autopick.ts` + `select.ts` — queue > best affordable > skip
-- [ ] 4.6 Replay determinism test over a long event fixture
-- [ ] 4.7 Schema: `drafts`, `draft_events`, `draft_picks` (unique constraints), `draft_queues` + migration
-- [ ] 4.8 Write path: `FOR UPDATE` txn, event append, projection insert, state update
-- [ ] 4.9 Undo via truncate-and-replay
-- [ ] 4.10 Draft endpoints: start, get, pick, skip, pause/resume, force-pick, queue, events
-- [ ] 4.11 WS `/leagues/:id/live` — topic multiplexing, `seq`, snapshot on connect, gap recovery
-- [ ] 4.12 Presence tracking in the draft room
-- [ ] 4.13 `draft-deadlines` job — advisory lock, no-op if `pickNo` advanced, live + async modes
-- [ ] 4.14 Pause freezes deadlines; resume recomputes them
-- [ ] 4.15 Concurrency tests: double pick → one 409; timer vs. real pick → one event
-- [ ] 4.16 Full 8×10 draft integration test; rebuild-from-events matches cached state
+- [x] 4.1 `packages/draft` types: `DraftConfig`, `DraftState`, `DraftEvent`, `Pick`
+- [x] 4.2 `order.ts` — snake + linear, finished teams skipped, tests for 4/6/8/odd
+- [x] 4.3 `reduce.ts` — total `apply()`, typed `InvalidEvent`
+- [x] 4.4 `validate.ts` — the 8 ordered checks including **roster reachability**, tests at the boundary
+- [x] 4.5 `autopick.ts` + `select.ts` — queue > best affordable > skip
+- [x] 4.6 Replay determinism test over a long event fixture
+- [x] 4.7 Schema: `drafts`, `draft_events`, `draft_picks` (unique constraints), `draft_queues` + migration
+- [x] 4.8 Write path: `FOR UPDATE` txn, event append, projection insert, state update
+- [x] 4.9 Undo via truncate-and-replay
+- [x] 4.10 Draft endpoints: start, get, pick, skip, pause/resume, force-pick, queue, events
+- [x] 4.11 WS `/leagues/:id/live` — topic multiplexing, `seq`, snapshot on connect, gap recovery
+- [x] 4.12 Presence tracking in the draft room
+- [x] 4.13 `draft-deadlines` job — advisory lock, no-op if `pickNo` advanced, live + async modes
+- [x] 4.14 Pause freezes deadlines; resume recomputes them
+- [x] 4.15 Concurrency tests: double pick → one 409; timer vs. real pick → one event
+- [x] 4.16 Full 8×10 draft integration test; rebuild-from-events matches cached state
 
 ## Phase 5 — Teams & visualizer API · [plan](plans/phase-05-teams.md)
 
