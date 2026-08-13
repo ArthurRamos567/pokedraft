@@ -7,6 +7,7 @@ import { draftModule } from './modules/draft'
 import { healthModule } from './modules/health'
 import { leaguesModule } from './modules/leagues'
 import { meModule } from './modules/me'
+import { playoffsModule } from './modules/playoffs'
 import { pointsModule } from './modules/points'
 import { seasonModule } from './modules/season'
 import { notificationsModule } from './modules/system'
@@ -50,6 +51,7 @@ export const app = new Elysia()
   .use(draftModule)
   .use(teamsModule)
   .use(seasonModule)
+  .use(playoffsModule)
   .use(realtimeModule)
   .use(meModule)
   .use(notificationsModule)

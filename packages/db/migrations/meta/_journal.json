@@ -36,6 +36,13 @@
       "when": 1786655633905,
       "tag": "0004_faulty_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786656295116,
+      "tag": "0005_faithful_alice",
+      "breakpoints": true
     }
   ]
 }

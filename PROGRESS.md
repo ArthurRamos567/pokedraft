@@ -110,14 +110,14 @@ move to the next task.
 
 ## Phase 7 — Playoffs · [plan](plans/phase-07-playoffs.md)
 
-- [ ] 7.1 Schema: `brackets`, `bracket_matches` with slot sources + migration
-- [ ] 7.2 Bracket generation pure fn: 4/8/16, byes to top seeds, + tests
-- [ ] 7.3 `advance()` pure fn, idempotent, + tests
-- [ ] 7.4 Double elimination + optional bracket reset
-- [ ] 7.5 Third-place match
-- [ ] 7.6 Generate preview/commit endpoints; frozen seeds
-- [ ] 7.7 `GET /playoffs` render-ready tree
-- [ ] 7.8 Host override with dependent-subtree cascade + tests
+- [x] 7.1 Schema: `brackets`, `bracket_matches` with slot sources + migration
+- [x] 7.2 Bracket generation pure fn: 4/8/16, byes to top seeds, + tests
+- [x] 7.3 `advance()` pure fn, idempotent, + tests
+- [x] 7.4 Double elimination + optional bracket reset
+- [x] 7.5 Third-place match
+- [x] 7.6 Generate preview/commit endpoints; frozen seeds
+- [x] 7.7 `GET /playoffs` render-ready tree
+- [x] 7.8 Host override with dependent-subtree cascade + tests
 
 ## Phase 8 — Transactions · [plan](plans/phase-08-transactions.md)
 
