@@ -9,6 +9,7 @@
       "!**/.output",
       "!**/.tanstack",
       "!**/migrations",
+      "!**/routeTree.gen.ts",
       "!DraftMVP"
     ]
   },

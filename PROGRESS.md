@@ -136,24 +136,24 @@ move to the next task.
 
 **Invoke `/frontend-design` before 9.2 and before every screen task.**
 
-- [ ] 9.1 TanStack Start scaffold, router, Query, Eden Treaty client, auth client
-- [ ] 9.2 Design system: tokens, type-color map, typography, primitives (Card, Table, Badge, StatBar, SpriteAvatar, TypeChip, Dialog)
-- [ ] 9.3 Auth screens: login, signup, verify
-- [ ] 9.4 Landing + public league directory + create/join flows
-- [ ] 9.5 League shell: nav, context, overview page
-- [ ] 9.6 Pool browser (search/filter/sort) + points list view
-- [ ] 9.7 Points import UI: drop YML → preview table → diff → commit
-- [ ] 9.8 `useLeagueSocket` hook — WS → Query cache, draft events via shared reducer, reconnect by `seq`
-- [ ] 9.9 Draft room: pool pane, board, my-team pane, queue, timer, optimistic picks
-- [ ] 9.10 Async draft variant: on-the-clock banner, queue-first interaction
-- [ ] 9.11 Teams grid
-- [ ] 9.12 Team visualizer: roster, coverage matrix, speed tiers, spend, export
-- [ ] 9.13 Schedule + match report dialog + confirm/dispute
-- [ ] 9.14 Standings table
-- [ ] 9.15 Bracket (SVG tree, scroll container)
-- [ ] 9.16 Trade builder + trade log, live `/validate`
-- [ ] 9.17 Host settings: rules, members, season/playoff generation
-- [ ] 9.18 Notifications, empty states, error states, loading skeletons
+- [x] 9.1 TanStack Start scaffold, router, Query, Eden Treaty client, auth client
+- [x] 9.2 Design system: tokens, type-color map, typography, primitives (Card, Table, Badge, StatBar, SpriteAvatar, TypeChip, Dialog)
+- [x] 9.3 Auth screens: login, signup, verify
+- [x] 9.4 Landing + public league directory + create/join flows
+- [x] 9.5 League shell: nav, context, overview page
+- [x] 9.6 Pool browser (search/filter/sort) + points list view
+- [x] 9.7 Points import UI: drop YML → preview table → diff → commit
+- [x] 9.8 `useLeagueSocket` hook — WS → Query cache, draft events via shared reducer, reconnect by `seq`
+- [x] 9.9 Draft room: pool pane, board, my-team pane, queue, timer, optimistic picks
+- [ ] 9.10 Async draft variant — the room works in async mode (deadline is a turn clock), but there is no queue-first UI or reminder banner
+- [x] 9.11 Teams grid
+- [x] 9.12 Team visualizer: roster, coverage matrix, speed tiers, spend, export
+- [x] 9.13 Schedule + match report dialog + confirm/dispute
+- [x] 9.14 Standings table
+- [x] 9.15 Bracket (SVG tree, scroll container)
+- [x] 9.16 Trade builder + trade log, live `/validate`
+- [ ] 9.17 Host settings — overview has invite/order/start; no settings editor, member management or season/playoff generation UI (APIs all exist)
+- [ ] 9.18 Empty, error and loading states are done throughout; the notifications inbox UI is not built (API exists)
 - [ ] 9.19 Playwright happy path: signup → league → points → draft → report → trade
 - [ ] 9.20 Responsive pass + accessibility pass (type labels, keyboard draft board, aria-live timers)
 
