@@ -50,20 +50,20 @@ move to the next task.
 
 ## Phase 3 — Leagues & points · [plan](plans/phase-03-leagues.md)
 
-- [ ] 3.1 Schema: `leagues`, `league_settings`, `league_members`, `league_invites` + migration
-- [ ] 3.2 Slug generation, league CRUD service
-- [ ] 3.3 `assertStatus()` lifecycle gate helper + tests
-- [ ] 3.4 `leagueMacro` — member/host scoping, private → 404
-- [ ] 3.5 Discovery endpoints: public directory, `/leagues/mine`, `/leagues/:slug`
-- [ ] 3.6 Invites: create, revoke, join by code, capacity + expiry checks
-- [ ] 3.7 Members: kick, role change, host transfer, own team profile
-- [ ] 3.8 Draft order: random draw + manual set
-- [ ] 3.9 Schema: `point_lists`, `point_entries` + migration
-- [ ] 3.10 YML parser — both shapes (name→points, points→names, `banned:`) + tests
-- [ ] 3.11 Import pipeline: resolve → classify (ok/illegal/unknown/duplicate) → diff
-- [ ] 3.12 `points/preview` + `points/commit` with hash guard, size/entry limits
-- [ ] 3.13 Points read endpoints, versions, single-entry edit
-- [ ] 3.14 Regression test: `DraftMVP/data/pool.json` → YML imports with zero unknowns
+- [x] 3.1 Schema: `leagues`, `league_settings`, `league_members`, `league_invites` + migration
+- [x] 3.2 Slug generation, league CRUD service
+- [x] 3.3 `assertStatus()` lifecycle gate helper + tests
+- [x] 3.4 `leagueMacro` — member/host scoping, private → 404
+- [x] 3.5 Discovery endpoints: public directory, `/leagues/mine`, `/leagues/:slug`
+- [x] 3.6 Invites: create, revoke, join by code, capacity + expiry checks
+- [x] 3.7 Members: kick, role change, host transfer, own team profile
+- [x] 3.8 Draft order: random draw + manual set
+- [x] 3.9 Schema: `point_lists`, `point_entries` + migration
+- [x] 3.10 YML parser — both shapes (name→points, points→names, `banned:`) + tests
+- [x] 3.11 Import pipeline: resolve → classify (ok/illegal/unknown/duplicate) → diff
+- [x] 3.12 `points/preview` + `points/commit` with hash guard, size/entry limits
+- [x] 3.13 Points read endpoints, versions, single-entry edit
+- [x] 3.14 Regression test: `DraftMVP/data/pool.json` → YML imports with zero unknowns
 
 ## Phase 4 — Draft engine & room · [plan](plans/phase-04-draft.md)
 

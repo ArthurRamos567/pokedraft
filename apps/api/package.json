@@ -22,7 +22,8 @@
     "@sinclair/typebox": "^0.34.52",
     "better-auth": "^1.4.0",
     "elysia": "^1.4.0",
-    "pino": "^9.13.1"
+    "pino": "^9.13.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@elysiajs/eden": "^1.4.9",

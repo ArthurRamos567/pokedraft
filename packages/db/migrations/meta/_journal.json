@@ -8,6 +8,13 @@
       "when": 1786651811407,
       "tag": "0000_nifty_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786653245598,
+      "tag": "0001_gray_wildside",
+      "breakpoints": true
     }
   ]
 }

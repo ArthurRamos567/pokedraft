@@ -4,7 +4,9 @@ import { Elysia } from 'elysia'
 import { env } from './env'
 import { dexModule } from './modules/dex'
 import { healthModule } from './modules/health'
+import { leaguesModule } from './modules/leagues'
 import { meModule } from './modules/me'
+import { pointsModule } from './modules/points'
 import { notificationsModule } from './modules/system'
 import { authPlugin } from './plugins/auth'
 import { errorsPlugin } from './plugins/errors'
@@ -39,6 +41,8 @@ export const app = new Elysia()
   .use(authPlugin)
   .use(healthModule)
   .use(dexModule)
+  .use(leaguesModule)
+  .use(pointsModule)
   .use(meModule)
   .use(notificationsModule)
 

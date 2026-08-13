@@ -2,7 +2,7 @@ import { schema } from '@pokedraft/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
-import { env, isProd } from './env'
+import { env, isProd, isTest } from './env'
 
 /**
  * A provider registers only when *both* of its variables are set. Blank OAuth
@@ -79,7 +79,9 @@ export const auth = betterAuth({
   },
 
   rateLimit: {
-    enabled: true,
+    // On everywhere real. Off under test, where a suite legitimately signs up
+    // twenty users a second from one address.
+    enabled: !isTest,
     window: 60,
     max: 30,
     customRules: {
