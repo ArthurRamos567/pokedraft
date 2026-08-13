@@ -18,7 +18,10 @@ services:
       # Faster startup, and this database is disposable.
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
-      - "5432:5432"
+      # 5442, not 5432 — a host postgres already owns the default port.
+      # Loopback-bound: this database has trivial credentials and must not be
+      # reachable from the network.
+      - "127.0.0.1:5442:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -43,7 +46,7 @@ services:
       postgres -c fsync=off -c synchronous_commit=off
                -c full_page_writes=off -c max_connections=200
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5443:5432"
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
