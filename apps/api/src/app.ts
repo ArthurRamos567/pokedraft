@@ -12,6 +12,7 @@ import { pointsModule } from './modules/points'
 import { seasonModule } from './modules/season'
 import { notificationsModule } from './modules/system'
 import { teamsModule } from './modules/teams'
+import { transactionsModule } from './modules/transactions'
 import { authPlugin } from './plugins/auth'
 import { errorsPlugin } from './plugins/errors'
 import { loggerPlugin } from './plugins/logger'
@@ -52,6 +53,7 @@ export const app = new Elysia()
   .use(teamsModule)
   .use(seasonModule)
   .use(playoffsModule)
+  .use(transactionsModule)
   .use(realtimeModule)
   .use(meModule)
   .use(notificationsModule)

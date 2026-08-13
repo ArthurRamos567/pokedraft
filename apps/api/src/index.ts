@@ -3,13 +3,14 @@ import { env } from './env'
 import { startJobs, stopJobs } from './jobs'
 import { autoConfirmJob } from './jobs/auto-confirm'
 import { draftDeadlinesJob } from './jobs/draft-deadlines'
+import { tradeExpiryJob } from './jobs/trade-expiry'
 import { logger } from './plugins/logger'
 
 app.listen(env.PORT, ({ hostname, port }) => {
   logger.info(`pokedraft api on http://${hostname}:${port}  ·  docs at /openapi`)
 })
 
-startJobs([draftDeadlinesJob, autoConfirmJob])
+startJobs([draftDeadlinesJob, autoConfirmJob, tradeExpiryJob])
 
 const shutdown = async (signal: string) => {
   logger.info(`${signal} — shutting down`)

@@ -121,16 +121,16 @@ move to the next task.
 
 ## Phase 8 — Transactions · [plan](plans/phase-08-transactions.md)
 
-- [ ] 8.1 Schema: `transactions`, `transaction_items`, `transaction_votes` + migration
-- [ ] 8.2 Trade validation pure fn — the 8 checks + tests
-- [ ] 8.3 Propose / accept / reject / cancel endpoints
-- [ ] 8.4 Approve / veto with ordered `FOR UPDATE` locking, revalidation inside txn
-- [ ] 8.5 `POST /transactions/validate` dry run
-- [ ] 8.6 Expiry job
-- [ ] 8.7 Optional league-vote veto mode
-- [ ] 8.8 Notifications on every state change
-- [ ] 8.9 Concurrency tests: shared-mon race, mirrored trades don't deadlock
-- [ ] 8.10 Roster fold after approval matches expectation for both sides
+- [x] 8.1 Schema: `transactions`, `transaction_items`, `transaction_votes` + migration
+- [x] 8.2 Trade validation pure fn — the 8 checks + tests
+- [x] 8.3 Propose / accept / reject / cancel endpoints
+- [x] 8.4 Approve / veto with ordered `FOR UPDATE` locking, revalidation inside txn
+- [x] 8.5 `POST /transactions/validate` dry run
+- [x] 8.6 Expiry job
+- [x] 8.7 Optional league-vote veto mode
+- [x] 8.8 Notifications on every state change
+- [x] 8.9 Concurrency tests: shared-mon race, mirrored trades don't deadlock
+- [x] 8.10 Roster fold after approval matches expectation for both sides
 
 ## Phase 9 — Frontend · [plan](plans/phase-09-frontend.md)
 
