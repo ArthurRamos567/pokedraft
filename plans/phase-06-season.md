@@ -98,52 +98,35 @@ disputed ───────────────────────�
 - Either participant may report; the *other* confirms
 - Auto-confirm after 48h of silence (configurable), because leagues stall on
   unresponsive opponents more than on disagreements
-- A valid replay whose parsed result matches the report auto-confirms
-  immediately — this is the fast path and should be the common one
+- `replay_url` is stored and linked but **not parsed in v1** — it's evidence a
+  human can click during a dispute
+- Optional per-mon K/D entry on the report form fills `match_stats` by hand.
+  Skippable; leaderboards degrade gracefully to "no data" rather than breaking
 - Host can force any state (`forfeited`, `void`, override winner), always
   audited
 - `closes_at` on the week doesn't hard-block reporting; late results are
   allowed but flagged, since real leagues run late
 
-## Replay parsing
+## Replay parsing — DEFERRED
 
-`packages/replay` — pure, testable against saved fixture logs.
+**Not in v1.** Full design lives in [future.md](future.md#replay-parsing).
 
-Fetch: `https://replay.pokemonshowdown.com/<id>.json` → `{ log, players, … }`.
-Rate-limited and cached in `replay_cache`; never fetched twice.
+It needs a corpus of real Showdown replay JSON to build against; without
+fixtures a parser is guesswork dressed as code. v1 stores `replay_url` as a
+clickable link and takes scores from the report.
 
-Parser walks the protocol log:
+What v1 must preserve so the parser drops in later without migrations:
 
-| Line | Use |
-|---|---|
-| `\|player\|p1\|Username\|…` | side → Showdown username → league member (via `users.showdownUsername`, host-confirmable fallback) |
-| `\|poke\|p1\|Landorus-Therian, M` | team preview → `brought` candidates |
-| `\|switch\|p1a: Nick\|Landorus-Therian, M\|100/100` | nickname → species map per side; marks `brought` |
-| `\|replace\|`, `\|detailschange\|` | Illusion (Zoroark) and forme changes — must not corrupt the nickname map |
-| `\|faint\|p1a: Nick` | +1 death for that species; +1 kill for the *opposing active* mon |
-| `\|win\|Username` | winner |
-
-Kill attribution rules:
-
-- Kill goes to the opposing side's currently-active mon at faint time
-- Hazard/status/weather/recoil deaths with no opposing contact: credited as an
-  **indirect** kill to the mon that set the hazard where determinable, else
-  unattributed — tracked as a separate `indirect` counter rather than fudged
-  into `kills`
-- Self-KO (Explosion, Life Orb, recoil) counts as a death, not an opposing kill
-
-Validation against the report:
-
-- Participants match the matchup's two members → else `REPLAY_PLAYER_MISMATCH`
-- Species used are all on the reporting member's roster (phase 5) → else flag
-  `ILLEGAL_SPECIES` for host review. This is how cheating actually gets caught,
-  so it's a first-class outcome, not a warning log
-- Winner matches the report → else `REPLAY_CONTRADICTS_REPORT`, forces
-  `disputed`
+- `replay_url` on `matchups`, validated as a well-formed
+  `replay.pokemonshowdown.com/<id>` URL and stored normalized to the bare ID
+- `match_stats` table exists and is populated by optional manual entry — the
+  parser will later write the same rows
+- `replay_cache` table exists, unused
+- Score is `home_score`/`away_score` as mons remaining, the same convention the
+  parser will compute
 
 Score = mons remaining for the winner, 0 for the loser (the usual differential
-convention); computed from the log, not trusted from the report, when a replay
-exists.
+convention), taken from the report in v1.
 
 ## Standings
 
@@ -180,30 +163,27 @@ head-to-head-first — leagues genuinely disagree about this.
 
 - RR generator: every pair meets exactly once; byes distributed evenly; same
   seed → same schedule
-- Parser fixtures: a normal 6v6, a game with Zoroark Illusion, a forfeit, a
-  timeout win, a game with hazard KOs, a forme-change game (Terastal / Mega)
-- Kill attribution matches hand-counted fixtures
-- Replay contradicting the report forces `disputed`
-- Off-roster species in a replay raises `ILLEGAL_SPECIES`
+- Report → confirm → standings update, end to end
+- Dispute path: reporter and opponent disagree, host resolves
 - Standings tiebreak chain, each level exercised in isolation
 - Auto-confirm timer fires at the configured age and not before
+- Malformed `replay_url` rejected; valid one normalized to a bare replay ID
+- Leaderboard with zero `match_stats` rows returns empty, not an error
 
 ## Acceptance criteria
 
 - A host generates a 9-week season for 8 players and every player sees their
   schedule
-- Reporting with a valid replay URL confirms instantly and populates per-mon
-  K/D
+- Reporting a result and having the opponent confirm updates standings
+  immediately
 - Standings match a hand-computed fixture league, including tiebreaks
-- The K/D leaderboard reproduces what the reference spreadsheet tracks
+- Manually entered per-mon K/D produces a working leaderboard; skipping it
+  degrades cleanly
 
 ## Risks
 
-- **Showdown replay availability.** Replays expire or are unlisted. Parsing
-  must degrade to manual reporting, never block it. Cache raw logs on first
-  fetch so an expired replay stays usable to us.
-- **Protocol drift.** Showdown's battle protocol evolves. Fixture tests are the
-  early warning; the parser ignores unknown lines rather than throwing.
-- **Username matching.** Showdown names differ from ours and change. Store
-  `showdownUsername` per user (phase 1), allow per-league override, and fall
-  back to host confirmation instead of guessing.
+- **Manual reporting is trust-based in v1.** No replay verification means a
+  dishonest report only surfaces via dispute. Acceptable — leagues are small
+  and social — but it's the reason the dispute path must be good.
+- **Username matching.** Deferred with the parser, but `showdownUsername` is
+  collected from phase 1 onward so the data exists when it's needed.

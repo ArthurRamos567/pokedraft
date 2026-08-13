@@ -113,11 +113,21 @@ Keyboard: `/` focus search, `enter` pick highlighted, `q` queue it.
 
 ## Design direction
 
+**Invoke the `/frontend-design` skill before writing any UI code.** Every
+screen in this phase goes through it — it exists precisely to stop the generic
+AI-dashboard look, which is the default failure mode for an unattended build.
+
 Pokédex energy without cosplaying Nintendo: dark-first surfaces, type colors
 as the accent system (they're already a familiar visual language), animated
 sprites from `@pkmn/img` used generously since they're the product's texture.
 Dense data tables that stay readable — this is a spreadsheet replacement, and
 losing information density would be losing the point.
+
+Establish the design system **once**, before any screen: color tokens, type
+color map, spacing scale, typography, and the core primitives (Card, Table,
+Badge, StatBar, SpriteAvatar, TypeChip, Dialog). Every later screen composes
+those primitives. Building screens first and extracting a system later
+produces eleven inconsistent pages.
 
 Responsive: the draft room is desktop-first (three panes) and collapses to
 tabbed panes on mobile; everything else is mobile-usable, since half of async

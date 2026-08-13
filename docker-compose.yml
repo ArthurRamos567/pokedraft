@@ -1,0 +1,70 @@
+# Dev default: infrastructure only.
+# App runs on the host via `bun dev` so you keep hot reload and a real debugger.
+#
+#   docker compose up -d
+#   bun db:migrate && bun dev
+#
+# Full containerized stack: docker-compose.full.yml
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: pokedraft-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pokedraft
+      POSTGRES_PASSWORD: pokedraft
+      POSTGRES_DB: pokedraft
+      # Faster startup, and this database is disposable.
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pokedraft -d pokedraft"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Throwaway database for integration tests — tmpfs, so it's fast and leaves
+  # nothing behind. Started only via: docker compose --profile test up -d
+  db-test:
+    image: postgres:17-alpine
+    container_name: pokedraft-db-test
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: pokedraft
+      POSTGRES_PASSWORD: pokedraft
+      POSTGRES_DB: pokedraft_test
+      POSTGRES_FSYNC: "off"
+    command: >
+      postgres -c fsync=off -c synchronous_commit=off
+               -c full_page_writes=off -c max_connections=200
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pokedraft -d pokedraft_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # Web UI for poking at the database. docker compose --profile tools up -d
+  adminer:
+    image: adminer:latest
+    container_name: pokedraft-adminer
+    profiles: ["tools"]
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

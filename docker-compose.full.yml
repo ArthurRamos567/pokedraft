@@ -1,0 +1,88 @@
+# Full containerized stack — db + api + web.
+# Use to verify the images build and run like production, or to hand someone a
+# one-command demo. Day-to-day development uses docker-compose.yml + `bun dev`.
+#
+#   docker compose -f docker-compose.full.yml up --build
+#
+# Requires .env at the repo root (see .env.example).
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pokedraft
+      POSTGRES_PASSWORD: pokedraft
+      POSTGRES_DB: pokedraft
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pokedraft -d pokedraft"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Runs migrations, then exits. The api waits for it to succeed, so a bad
+  # migration fails the stack instead of crash-looping the server.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runner
+    command: ["bun", "run", "db:migrate"]
+    environment:
+      DATABASE_URL: postgres://pokedraft:pokedraft@db:5432/pokedraft
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://pokedraft:pokedraft@db:5432/pokedraft
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "bun", "--eval", "await fetch('http://localhost:3000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5173
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
