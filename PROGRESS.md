@@ -86,13 +86,13 @@ move to the next task.
 
 ## Phase 5 — Teams & visualizer API · [plan](plans/phase-05-teams.md)
 
-- [ ] 5.1 `roster.ts` — the single derivation, with cache invalidation, + tests
-- [ ] 5.2 `team_profiles` schema + migration
-- [ ] 5.3 `GET /teams` and `/teams/:memberId` — no N+1, query-count test
-- [ ] 5.4 Coverage endpoint (defensive + offensive matrices)
-- [ ] 5.5 Speed tiers endpoint with league percentiles
-- [ ] 5.6 Showdown paste export via `@pkmn/sets`, round-trip test
-- [ ] 5.7 `GET /pool?status=undrafted`
+- [x] 5.1 `roster.ts` — the single derivation, with cache invalidation, + tests
+- [x] 5.2 `team_profiles` schema + migration
+- [x] 5.3 `GET /teams` and `/teams/:memberId` — no N+1, query-count test
+- [x] 5.4 Coverage endpoint (defensive + offensive matrices)
+- [x] 5.5 Speed tiers endpoint with league percentiles
+- [x] 5.6 Showdown paste export via `@pkmn/sets`, round-trip test
+- [x] 5.7 `GET /pool?status=undrafted`
 
 ## Phase 6 — Season & results · [plan](plans/phase-06-season.md)
 
