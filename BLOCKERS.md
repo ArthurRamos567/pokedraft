@@ -16,6 +16,15 @@ Format:
 
 None open.
 
+Deferred by decision, not by obstacle:
+
+- **Replay parsing** — needs a corpus of real Showdown logs. `replay_url` is
+  stored normalized, and `match_stats` / `replay_cache` exist unused, so the
+  parser drops in without a migration. See `plans/future.md`.
+- **Post-trade point cap** — the check exists in `validateTrade` but is wired
+  off, because most leagues want value to drift after the draft. Turning it on
+  is one field in `rules()`.
+
 Resolved:
 
 - **OAuth credentials (phase 1)** — no longer blocking. Providers are built

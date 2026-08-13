@@ -28,8 +28,8 @@ FROM base AS runner
 ENV NODE_ENV=production
 RUN addgroup -S app && adduser -S -G app app
 
-COPY --from=build /app/apps/web/.output ./.output
+COPY --from=build /app/apps/web/dist ./dist
 
 USER app
 EXPOSE 5173
-CMD ["bun", "run", ".output/server/index.mjs"]
+CMD ["bun", "run", "dist/server/server.js"]

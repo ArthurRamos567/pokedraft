@@ -161,7 +161,8 @@ move to the next task.
 
 ## Done
 
-Nothing yet. Plans and infra only.
+Phases 1–8 are complete and green. Phase 9 is built except for the five items
+still unchecked above.
 
 - [x] 0.1 Repo init, plans, `CLAUDE.md`, `PROGRESS.md`, `scripts/verify.sh`
 - [x] 0.2 Docker: `docker-compose.yml` (db + test db + adminer), `docker-compose.full.yml`, API and web Dockerfiles
