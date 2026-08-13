@@ -96,17 +96,17 @@ move to the next task.
 
 ## Phase 6 — Season & results · [plan](plans/phase-06-season.md)
 
-- [ ] 6.1 `packages/season` scaffold
-- [ ] 6.2 Round-robin generator (port `DraftMVP/src/bracket.js`), seeded + deterministic, fair byes, double-RR, + tests
-- [ ] 6.3 Schema: `seasons`, `weeks`, `matchups`, `match_reports`, `match_stats`, `replay_cache` + migration
-- [ ] 6.4 Season generate preview + commit
-- [ ] 6.5 Schedule endpoints; host reschedule/forfeit/void
-- [ ] 6.6 Report → confirm → dispute → host resolve flow
-- [ ] 6.7 Optional manual per-mon K/D entry on the report
-- [ ] 6.8 `replay_url` validation + normalization to bare ID (no parsing — deferred)
-- [ ] 6.9 Auto-confirm job at configured age
-- [ ] 6.10 Standings: tiebreak chain, both orderings, + tests
-- [ ] 6.11 Leaderboard endpoints, empty-data safe
+- [x] 6.1 `packages/season` scaffold
+- [x] 6.2 Round-robin generator (port `DraftMVP/src/bracket.js`), seeded + deterministic, fair byes, double-RR, + tests
+- [x] 6.3 Schema: `seasons`, `weeks`, `matchups`, `match_reports`, `match_stats`, `replay_cache` + migration
+- [x] 6.4 Season generate preview + commit
+- [x] 6.5 Schedule endpoints; host reschedule/forfeit/void
+- [x] 6.6 Report → confirm → dispute → host resolve flow
+- [x] 6.7 Optional manual per-mon K/D entry on the report
+- [x] 6.8 `replay_url` validation + normalization to bare ID (no parsing — deferred)
+- [x] 6.9 Auto-confirm job at configured age
+- [x] 6.10 Standings: tiebreak chain, both orderings, + tests
+- [x] 6.11 Leaderboard endpoints, empty-data safe
 
 ## Phase 7 — Playoffs · [plan](plans/phase-07-playoffs.md)
 

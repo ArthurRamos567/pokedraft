@@ -55,6 +55,10 @@
       "name": "@pokedraft/draft",
       "version": "0.0.0",
     },
+    "packages/season": {
+      "name": "@pokedraft/season",
+      "version": "0.0.0",
+    },
     "packages/shared": {
       "name": "@pokedraft/shared",
       "version": "0.0.0",
@@ -198,6 +202,8 @@
     "@pokedraft/dex": ["@pokedraft/dex@workspace:packages/dex"],
 
     "@pokedraft/draft": ["@pokedraft/draft@workspace:packages/draft"],
+
+    "@pokedraft/season": ["@pokedraft/season@workspace:packages/season"],
 
     "@pokedraft/shared": ["@pokedraft/shared@workspace:packages/shared"],
 
