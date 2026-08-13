@@ -1,0 +1,12 @@
+{
+  "name": "pokedraft",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local snake-draft board for a gen 8 National Dex tournament",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/server.mjs",
+    "scrape": "node tools/scrape.mjs",
+    "test": "node --test tools/*.test.mjs"
+  }
+}

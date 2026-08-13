@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matchups</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="display-page">
+
+<header class="topbar">
+  <h1>Matchups</h1>
+  <div class="link-status">
+    <span id="link" class="dot offline"></span>
+    <span id="devices" class="muted">connecting…</span>
+  </div>
+  <div class="actions">
+    <span id="progress" class="muted"></span>
+    <a href="index.html" class="ghost-link">← draft board</a>
+  </div>
+</header>
+
+<main class="display">
+  <p id="empty" class="empty muted">No bracket drawn yet.</p>
+  <section id="cut-wrap" class="display-cut" hidden>
+    <h2>Playoffs</h2>
+    <div id="cut" class="display-cut-cols"></div>
+  </section>
+  <section id="rounds-wrap" hidden>
+    <h2>Round robin</h2>
+    <div id="rounds" class="display-rounds"></div>
+  </section>
+</main>
+
+<script type="module" src="src/matchups.js"></script>
+</body>
+</html>

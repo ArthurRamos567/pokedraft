@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gen 8 Nat Dex Draft</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Gen 8 Nat Dex Draft</h1>
+
+  <div class="link-status">
+    <span id="link" class="dot offline" title="connecting…"></span>
+    <span id="devices" class="muted">connecting…</span>
+  </div>
+
+  <div class="setup">
+    <label>Budget <input id="default-budget" type="number" min="1" value="100"></label>
+    <label>Max roster <input id="max-roster" type="number" min="0" value="0" title="0 = unlimited, draft ends when budgets run dry"></label>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="draft" class="tab active">Draft</button>
+    <button data-view="bracket" class="tab">Bracket</button>
+    <a href="bracket.html" target="_blank" rel="noopener" class="ghost-link" title="read-only matchups, for a second screen">Matchups ↗</a>
+  </nav>
+
+  <div class="actions">
+    <button id="btn-randomize" class="ghost">🎲 Randomize order</button>
+    <button id="btn-start" class="primary">Start draft</button>
+    <button id="btn-undo" class="ghost">↶ Undo</button>
+    <button id="btn-export" class="ghost">Export</button>
+    <button id="btn-import" class="ghost">Import</button>
+    <button id="btn-reset" class="danger">Reset</button>
+    <input id="file-import" type="file" accept="application/json" hidden>
+  </div>
+</header>
+
+<main id="view-draft">
+  <!-- ------------------------------------------------------------ players -->
+  <section class="panel players">
+    <h2>Players</h2>
+    <form id="add-player" class="add-player">
+      <input id="player-name" type="text" placeholder="Player name" autocomplete="off" required>
+      <button type="submit" class="primary">Add</button>
+    </form>
+    <ul id="player-list" class="player-list"></ul>
+  </section>
+
+  <!-- -------------------------------------------------------------- store -->
+  <section class="panel store">
+    <div class="store-head">
+      <h2>Store <span id="pool-count" class="muted"></span></h2>
+      <div class="filters">
+        <input id="search" type="search" placeholder="Search name / type / ability" autocomplete="off">
+        <div class="tier-filter" id="tier-filter">
+          <button data-tier="ALL" class="chip active">All</button>
+          <button data-tier="OU" class="chip">OU</button>
+          <button data-tier="UU" class="chip">UU</button>
+          <button data-tier="RU" class="chip">RU</button>
+          <button data-tier="UR" class="chip" title="legal but unranked — 1 point">UR</button>
+        </div>
+        <select id="sort">
+          <option value="cost-desc">Cost ↓ · BST ↓</option>
+          <option value="cost-asc">Cost ↑ · BST ↓</option>
+          <option value="name">Name A–Z</option>
+          <option value="bst-desc">BST ↓</option>
+        </select>
+        <label class="toggle"><input id="hide-unaffordable" type="checkbox"> affordable only</label>
+        <label class="toggle"><input id="hide-taken" type="checkbox" checked> hide drafted</label>
+      </div>
+    </div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <!-- ---------------------------------------------------------- order/log -->
+  <section class="panel board">
+    <h2>Draft board</h2>
+    <div id="turn" class="turn"></div>
+    <h3 id="order-title">Order</h3>
+    <ol id="order-list" class="order-list"></ol>
+    <h3>Up next</h3>
+    <ol id="upnext" class="upnext"></ol>
+    <h3>Log</h3>
+    <ul id="log" class="log"></ul>
+  </section>
+</main>
+
+<!-- ------------------------------------------------------------- bracket -->
+<main id="view-bracket" hidden>
+  <section class="panel standings">
+    <h2>Standings</h2>
+    <table id="standings-table" class="standings-table">
+      <thead>
+        <tr><th>#</th><th>Player</th><th title="matches played">P</th><th>W</th><th>L</th><th title="games won–lost">Games</th><th title="game difference">±</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="standings-note" class="muted"></p>
+    <div class="bracket-actions">
+      <button id="btn-draw" class="primary">🎲 Draw round robin</button>
+      <button id="btn-reset-bracket" class="danger">Clear bracket</button>
+    </div>
+  </section>
+
+  <section class="panel schedule">
+    <h2>Round robin <span id="rr-progress" class="muted"></span></h2>
+    <div id="rounds"></div>
+  </section>
+
+  <section class="panel playoffs">
+    <h2>Top 4 cut</h2>
+    <div id="cut"></div>
+  </section>
+</main>
+
+<!-- match result -->
+<div id="result" class="overlay" hidden>
+  <div class="dialog">
+    <p id="result-text"></p>
+    <div class="score-row">
+      <span id="result-winner" class="score-name"></span>
+      <input id="score-winner" type="number" min="0" max="9" value="2">
+      <span class="muted">–</span>
+      <input id="score-loser" type="number" min="0" max="9" value="0">
+      <span id="result-loser" class="score-name muted"></span>
+    </div>
+    <div class="quick-scores" id="quick-scores">
+      <button data-score="2-0" class="chip">2–0</button>
+      <button data-score="2-1" class="chip">2–1</button>
+      <button data-score="3-0" class="chip">3–0</button>
+      <button data-score="3-1" class="chip">3–1</button>
+      <button data-score="3-2" class="chip">3–2</button>
+    </div>
+    <div class="dialog-actions">
+      <button id="result-no" class="ghost">Cancel</button>
+      <button id="result-yes" class="primary">Save result</button>
+    </div>
+  </div>
+</div>
+
+<!-- pick confirmation -->
+<div id="confirm" class="overlay" hidden>
+  <div class="dialog">
+    <img id="confirm-sprite" alt="">
+    <p id="confirm-text"></p>
+    <div class="dialog-actions">
+      <button id="confirm-no" class="ghost">Cancel</button>
+      <button id="confirm-yes" class="primary">Draft it</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

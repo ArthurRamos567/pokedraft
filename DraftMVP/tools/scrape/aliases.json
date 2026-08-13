@@ -1,0 +1,35 @@
+{
+  "__comment": "Viability-thread shorthand -> exact Smogon dex name. __ignore lists prose fragments the parser must not treat as unresolved Pokemon.",
+
+  "Landorus T": "Landorus-Therian",
+  "Landorus-T": "Landorus-Therian",
+  "Thundurus-T": "Thundurus-Therian",
+  "Tornadus-T": "Tornadus-Therian",
+  "Rotom-W": "Rotom-Wash",
+  "Rotom-H": "Rotom-Heat",
+  "Urshifu-RS": "Urshifu-Rapid-Strike",
+  "Urshifu-R": "Urshifu-Rapid-Strike",
+  "Deoxys-D": "Deoxys-Defense",
+  "Deoxys-S": "Deoxys-Speed",
+  "Deoxys-A": "Deoxys-Attack",
+  "Hoopa-U": "Hoopa-Unbound",
+  "RaichuAlola": "Raichu-Alola",
+  "Necrozma-DM": "Necrozma-Dusk Mane",
+  "Necrozma-DW": "Necrozma-Dawn Wings",
+  "Zygarde-10": "Zygarde-10%",
+
+  "__ignore": [
+    "here",
+    "had",
+    "Reasoning",
+    "No one liners",
+    "NEW",
+    "Ranks",
+    "Rising",
+    "Dropping",
+    "New",
+    "Unranked",
+    "Credits",
+    "Index"
+  ]
+}
