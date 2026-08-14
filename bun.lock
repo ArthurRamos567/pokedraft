@@ -20,6 +20,8 @@
         "@pkmn/sets": "^5.2.0",
         "@pokedraft/db": "workspace:*",
         "@pokedraft/dex": "workspace:*",
+        "@pokedraft/draft": "workspace:*",
+        "@pokedraft/season": "workspace:*",
         "@pokedraft/shared": "workspace:*",
         "@sinclair/typebox": "^0.34.52",
         "better-auth": "^1.4.0",

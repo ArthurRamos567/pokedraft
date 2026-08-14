@@ -1,0 +1,105 @@
+# Dokploy stack — db + migrate + api + web, no published ports.
+#
+# Dokploy's Traefik reaches a container only over the shared `dokploy-network`,
+# and routes by the domain you attach in the UI (web → 5173, api → 3000).
+# Publishing host ports here would expose Postgres and the API on the VPS's
+# public interface, bypassing that. See DEPLOY.md.
+#
+# Every variable comes from the stack's Environment tab in Dokploy, which is
+# written to .env next to this file before `docker compose up`.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pokedraft}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-pokedraft}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pokedraft} -d ${POSTGRES_DB:-pokedraft}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Runs migrations, then exits. The api waits for it to succeed, so a bad
+  # migration fails the deploy instead of crash-looping the server.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ["bun", "run", "db:migrate"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
+      # Public https URL of the API domain — Better Auth signs callbacks with it.
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?set BETTER_AUTH_URL}
+      # Public https URL of the web domain — CORS and cookie trust hang off it.
+      WEB_ORIGIN: ${WEB_ORIGIN:?set WEB_ORIGIN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    expose:
+      - "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "bun", "--eval", "const r = await fetch('http://localhost:3000/health'); if (!r.ok) process.exit(1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - default
+      - dokploy-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Baked into the client bundle at build time, so changing the API domain
+        # means a rebuild, not a restart. Same value as BETTER_AUTH_URL.
+        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5173
+    expose:
+      - "5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - default
+      - dokploy-network
+
+volumes:
+  pgdata:
+
+networks:
+  # Created by Dokploy on install. Traefik lives here; the db deliberately
+  # does not.
+  dokploy-network:
+    external: true
