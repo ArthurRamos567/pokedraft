@@ -3,10 +3,16 @@ import { useState } from 'react'
 import { signIn } from '../lib/auth'
 import { ErrorBar } from '../ui'
 
-export const Route = createFileRoute('/login')({ component: Login })
+export const Route = createFileRoute('/login')({
+  component: Login,
+  // `join` is an invite code parked here while the visitor signs in.
+  validateSearch: (search: Record<string, unknown>): { join?: string } =>
+    typeof search.join === 'string' ? { join: search.join } : {},
+})
 
 function Login() {
   const navigate = useNavigate()
+  const { join } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +36,7 @@ function Login() {
               .email({ email, password })
               .then((res) => {
                 if (res.error) setError(res.error.message ?? 'could not sign in')
+                else if (join) void navigate({ to: '/join/$code', params: { code: join } })
                 else void navigate({ to: '/dashboard' })
               })
               .finally(() => setBusy(false))
@@ -65,7 +72,7 @@ function Login() {
 
         <p className="dim" style={{ margin: 0, fontSize: 13 }}>
           No account yet?{' '}
-          <Link to="/signup" style={{ color: 'var(--live)' }}>
+          <Link to="/signup" search={{ join }} style={{ color: 'var(--live)' }}>
             Create one
           </Link>
           .

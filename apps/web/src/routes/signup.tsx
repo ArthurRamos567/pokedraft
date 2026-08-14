@@ -3,10 +3,15 @@ import { useState } from 'react'
 import { signUp } from '../lib/auth'
 import { ErrorBar } from '../ui'
 
-export const Route = createFileRoute('/signup')({ component: SignUp })
+export const Route = createFileRoute('/signup')({
+  component: SignUp,
+  validateSearch: (search: Record<string, unknown>): { join?: string } =>
+    typeof search.join === 'string' ? { join: search.join } : {},
+})
 
 function SignUp() {
   const navigate = useNavigate()
+  const { join } = Route.useSearch()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,6 +36,7 @@ function SignUp() {
               .email({ email, password, name })
               .then((res) => {
                 if (res.error) setError(res.error.message ?? 'could not sign up')
+                else if (join) void navigate({ to: '/join/$code', params: { code: join } })
                 else void navigate({ to: '/dashboard' })
               })
               .finally(() => setBusy(false))
@@ -79,7 +85,7 @@ function SignUp() {
 
         <p className="dim" style={{ margin: 0, fontSize: 13 }}>
           Already have one?{' '}
-          <Link to="/login" style={{ color: 'var(--live)' }}>
+          <Link to="/login" search={{ join }} style={{ color: 'var(--live)' }}>
             Sign in
           </Link>
           .

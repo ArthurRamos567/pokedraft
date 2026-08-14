@@ -6,16 +6,29 @@ import { ErrorBar } from '../ui'
 export const Route = createFileRoute('/join')({ component: JoinByCode })
 
 function JoinByCode() {
+  return <JoinCard />
+}
+
+/** Shared with `/join/$code`, which arrives from an invite link with the code filled in. */
+export function JoinCard({
+  initialCode = '',
+  eyebrow = 'Someone sent you a code',
+  initialError = null,
+}: {
+  initialCode?: string
+  eyebrow?: string
+  initialError?: unknown
+}) {
   const navigate = useNavigate()
-  const [code, setCode] = useState('')
-  const [error, setError] = useState<unknown>(null)
+  const [code, setCode] = useState(initialCode)
+  const [error, setError] = useState<unknown>(initialError)
   const [busy, setBusy] = useState(false)
 
   return (
     <div className="wrap" style={{ maxWidth: 420 }}>
       <div className="card card-pad stack reveal" style={{ gap: 16 }}>
         <div className="stack" style={{ gap: 4 }}>
-          <span className="label">Someone sent you a code</span>
+          <span className="label">{eyebrow}</span>
           <h2>Join a league</h2>
         </div>
         <form

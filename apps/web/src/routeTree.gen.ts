@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as JoinCodeRouteImport } from './routes/join_.$code'
 import { Route as LeaguesIndexRouteImport } from './routes/leagues.index'
 import { Route as LeaguesSlugRouteImport } from './routes/leagues.$slug'
 import { Route as LeaguesNewRouteImport } from './routes/leagues.new'
@@ -52,6 +53,11 @@ const LoginRoute = LoginRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinCodeRoute = JoinCodeRouteImport.update({
+  id: '/join_/$code',
+  path: '/join/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaguesIndexRoute = LeaguesIndexRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/join/$code': typeof JoinCodeRoute
   '/leagues/$slug': typeof LeaguesSlugRouteWithChildren
   '/leagues/new': typeof LeaguesNewRoute
   '/leagues/': typeof LeaguesIndexRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/join/$code': typeof JoinCodeRoute
   '/leagues/new': typeof LeaguesNewRoute
   '/leagues': typeof LeaguesIndexRoute
   '/leagues/$slug/bracket': typeof LeaguesSlugBracketRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/join_/$code': typeof JoinCodeRoute
   '/leagues/$slug': typeof LeaguesSlugRouteWithChildren
   '/leagues/new': typeof LeaguesNewRoute
   '/leagues/': typeof LeaguesIndexRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/signup'
+    | '/join/$code'
     | '/leagues/$slug'
     | '/leagues/new'
     | '/leagues/'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/signup'
+    | '/join/$code'
     | '/leagues/new'
     | '/leagues'
     | '/leagues/$slug/bracket'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/signup'
+    | '/join_/$code'
     | '/leagues/$slug'
     | '/leagues/new'
     | '/leagues/'
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   JoinRoute: typeof JoinRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  JoinCodeRoute: typeof JoinCodeRoute
   LeaguesSlugRoute: typeof LeaguesSlugRouteWithChildren
   LeaguesNewRoute: typeof LeaguesNewRoute
   LeaguesIndexRoute: typeof LeaguesIndexRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join_/$code': {
+      id: '/join_/$code'
+      path: '/join/$code'
+      fullPath: '/join/$code'
+      preLoaderRoute: typeof JoinCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leagues/': {
@@ -441,6 +461,7 @@ const rootRouteChildren: RootRouteChildren = {
   JoinRoute: JoinRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  JoinCodeRoute: JoinCodeRoute,
   LeaguesSlugRoute: LeaguesSlugRouteWithChildren,
   LeaguesNewRoute: LeaguesNewRoute,
   LeaguesIndexRoute: LeaguesIndexRoute,
