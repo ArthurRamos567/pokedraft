@@ -11,7 +11,7 @@ export function spriteUrl(
   opts: { style?: SpriteStyle; shiny?: boolean; side?: 'p1' | 'p2' } = {},
 ) {
   const s = Sprites.getPokemon(speciesName, {
-    gen: opts.style ?? 'gen5ani',
+    gen: opts.style ?? 'ani',
     shiny: opts.shiny,
     side: opts.side ?? 'p2',
   })

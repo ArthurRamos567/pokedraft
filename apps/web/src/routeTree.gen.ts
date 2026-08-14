@@ -23,9 +23,10 @@ import { Route as LeaguesSlugDraftRouteImport } from './routes/leagues.$slug.dra
 import { Route as LeaguesSlugPointsRouteImport } from './routes/leagues.$slug.points'
 import { Route as LeaguesSlugPoolRouteImport } from './routes/leagues.$slug.pool'
 import { Route as LeaguesSlugScheduleRouteImport } from './routes/leagues.$slug.schedule'
+import { Route as LeaguesSlugSpeedRouteImport } from './routes/leagues.$slug.speed'
 import { Route as LeaguesSlugStandingsRouteImport } from './routes/leagues.$slug.standings'
-import { Route as LeaguesSlugTeamsRouteImport } from './routes/leagues.$slug.teams'
 import { Route as LeaguesSlugTradesRouteImport } from './routes/leagues.$slug.trades'
+import { Route as LeaguesSlugTeamsIndexRouteImport } from './routes/leagues.$slug.teams.index'
 import { Route as LeaguesSlugTeamsMemberIdRouteImport } from './routes/leagues.$slug.teams.$memberId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -98,14 +99,14 @@ const LeaguesSlugScheduleRoute = LeaguesSlugScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => LeaguesSlugRoute,
 } as any)
+const LeaguesSlugSpeedRoute = LeaguesSlugSpeedRouteImport.update({
+  id: '/speed',
+  path: '/speed',
+  getParentRoute: () => LeaguesSlugRoute,
+} as any)
 const LeaguesSlugStandingsRoute = LeaguesSlugStandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
-  getParentRoute: () => LeaguesSlugRoute,
-} as any)
-const LeaguesSlugTeamsRoute = LeaguesSlugTeamsRouteImport.update({
-  id: '/teams',
-  path: '/teams',
   getParentRoute: () => LeaguesSlugRoute,
 } as any)
 const LeaguesSlugTradesRoute = LeaguesSlugTradesRouteImport.update({
@@ -113,11 +114,16 @@ const LeaguesSlugTradesRoute = LeaguesSlugTradesRouteImport.update({
   path: '/trades',
   getParentRoute: () => LeaguesSlugRoute,
 } as any)
+const LeaguesSlugTeamsIndexRoute = LeaguesSlugTeamsIndexRouteImport.update({
+  id: '/teams/',
+  path: '/teams/',
+  getParentRoute: () => LeaguesSlugRoute,
+} as any)
 const LeaguesSlugTeamsMemberIdRoute =
   LeaguesSlugTeamsMemberIdRouteImport.update({
-    id: '/$memberId',
-    path: '/$memberId',
-    getParentRoute: () => LeaguesSlugTeamsRoute,
+    id: '/teams/$memberId',
+    path: '/teams/$memberId',
+    getParentRoute: () => LeaguesSlugRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -134,11 +140,12 @@ export interface FileRoutesByFullPath {
   '/leagues/$slug/points': typeof LeaguesSlugPointsRoute
   '/leagues/$slug/pool': typeof LeaguesSlugPoolRoute
   '/leagues/$slug/schedule': typeof LeaguesSlugScheduleRoute
+  '/leagues/$slug/speed': typeof LeaguesSlugSpeedRoute
   '/leagues/$slug/standings': typeof LeaguesSlugStandingsRoute
-  '/leagues/$slug/teams': typeof LeaguesSlugTeamsRouteWithChildren
   '/leagues/$slug/trades': typeof LeaguesSlugTradesRoute
   '/leagues/$slug/': typeof LeaguesSlugIndexRoute
   '/leagues/$slug/teams/$memberId': typeof LeaguesSlugTeamsMemberIdRoute
+  '/leagues/$slug/teams/': typeof LeaguesSlugTeamsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,11 +160,12 @@ export interface FileRoutesByTo {
   '/leagues/$slug/points': typeof LeaguesSlugPointsRoute
   '/leagues/$slug/pool': typeof LeaguesSlugPoolRoute
   '/leagues/$slug/schedule': typeof LeaguesSlugScheduleRoute
+  '/leagues/$slug/speed': typeof LeaguesSlugSpeedRoute
   '/leagues/$slug/standings': typeof LeaguesSlugStandingsRoute
-  '/leagues/$slug/teams': typeof LeaguesSlugTeamsRouteWithChildren
   '/leagues/$slug/trades': typeof LeaguesSlugTradesRoute
   '/leagues/$slug': typeof LeaguesSlugIndexRoute
   '/leagues/$slug/teams/$memberId': typeof LeaguesSlugTeamsMemberIdRoute
+  '/leagues/$slug/teams': typeof LeaguesSlugTeamsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,11 +182,12 @@ export interface FileRoutesById {
   '/leagues/$slug/points': typeof LeaguesSlugPointsRoute
   '/leagues/$slug/pool': typeof LeaguesSlugPoolRoute
   '/leagues/$slug/schedule': typeof LeaguesSlugScheduleRoute
+  '/leagues/$slug/speed': typeof LeaguesSlugSpeedRoute
   '/leagues/$slug/standings': typeof LeaguesSlugStandingsRoute
-  '/leagues/$slug/teams': typeof LeaguesSlugTeamsRouteWithChildren
   '/leagues/$slug/trades': typeof LeaguesSlugTradesRoute
   '/leagues/$slug/': typeof LeaguesSlugIndexRoute
   '/leagues/$slug/teams/$memberId': typeof LeaguesSlugTeamsMemberIdRoute
+  '/leagues/$slug/teams/': typeof LeaguesSlugTeamsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -196,11 +205,12 @@ export interface FileRouteTypes {
     | '/leagues/$slug/points'
     | '/leagues/$slug/pool'
     | '/leagues/$slug/schedule'
+    | '/leagues/$slug/speed'
     | '/leagues/$slug/standings'
-    | '/leagues/$slug/teams'
     | '/leagues/$slug/trades'
     | '/leagues/$slug/'
     | '/leagues/$slug/teams/$memberId'
+    | '/leagues/$slug/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -215,11 +225,12 @@ export interface FileRouteTypes {
     | '/leagues/$slug/points'
     | '/leagues/$slug/pool'
     | '/leagues/$slug/schedule'
+    | '/leagues/$slug/speed'
     | '/leagues/$slug/standings'
-    | '/leagues/$slug/teams'
     | '/leagues/$slug/trades'
     | '/leagues/$slug'
     | '/leagues/$slug/teams/$memberId'
+    | '/leagues/$slug/teams'
   id:
     | '__root__'
     | '/'
@@ -235,11 +246,12 @@ export interface FileRouteTypes {
     | '/leagues/$slug/points'
     | '/leagues/$slug/pool'
     | '/leagues/$slug/schedule'
+    | '/leagues/$slug/speed'
     | '/leagues/$slug/standings'
-    | '/leagues/$slug/teams'
     | '/leagues/$slug/trades'
     | '/leagues/$slug/'
     | '/leagues/$slug/teams/$memberId'
+    | '/leagues/$slug/teams/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -353,18 +365,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaguesSlugScheduleRouteImport
       parentRoute: typeof LeaguesSlugRoute
     }
+    '/leagues/$slug/speed': {
+      id: '/leagues/$slug/speed'
+      path: '/speed'
+      fullPath: '/leagues/$slug/speed'
+      preLoaderRoute: typeof LeaguesSlugSpeedRouteImport
+      parentRoute: typeof LeaguesSlugRoute
+    }
     '/leagues/$slug/standings': {
       id: '/leagues/$slug/standings'
       path: '/standings'
       fullPath: '/leagues/$slug/standings'
       preLoaderRoute: typeof LeaguesSlugStandingsRouteImport
-      parentRoute: typeof LeaguesSlugRoute
-    }
-    '/leagues/$slug/teams': {
-      id: '/leagues/$slug/teams'
-      path: '/teams'
-      fullPath: '/leagues/$slug/teams'
-      preLoaderRoute: typeof LeaguesSlugTeamsRouteImport
       parentRoute: typeof LeaguesSlugRoute
     }
     '/leagues/$slug/trades': {
@@ -374,26 +386,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaguesSlugTradesRouteImport
       parentRoute: typeof LeaguesSlugRoute
     }
+    '/leagues/$slug/teams/': {
+      id: '/leagues/$slug/teams/'
+      path: '/teams'
+      fullPath: '/leagues/$slug/teams/'
+      preLoaderRoute: typeof LeaguesSlugTeamsIndexRouteImport
+      parentRoute: typeof LeaguesSlugRoute
+    }
     '/leagues/$slug/teams/$memberId': {
       id: '/leagues/$slug/teams/$memberId'
-      path: '/$memberId'
+      path: '/teams/$memberId'
       fullPath: '/leagues/$slug/teams/$memberId'
       preLoaderRoute: typeof LeaguesSlugTeamsMemberIdRouteImport
-      parentRoute: typeof LeaguesSlugTeamsRoute
+      parentRoute: typeof LeaguesSlugRoute
     }
   }
 }
-
-interface LeaguesSlugTeamsRouteChildren {
-  LeaguesSlugTeamsMemberIdRoute: typeof LeaguesSlugTeamsMemberIdRoute
-}
-
-const LeaguesSlugTeamsRouteChildren: LeaguesSlugTeamsRouteChildren = {
-  LeaguesSlugTeamsMemberIdRoute: LeaguesSlugTeamsMemberIdRoute,
-}
-
-const LeaguesSlugTeamsRouteWithChildren =
-  LeaguesSlugTeamsRoute._addFileChildren(LeaguesSlugTeamsRouteChildren)
 
 interface LeaguesSlugRouteChildren {
   LeaguesSlugBracketRoute: typeof LeaguesSlugBracketRoute
@@ -401,10 +409,12 @@ interface LeaguesSlugRouteChildren {
   LeaguesSlugPointsRoute: typeof LeaguesSlugPointsRoute
   LeaguesSlugPoolRoute: typeof LeaguesSlugPoolRoute
   LeaguesSlugScheduleRoute: typeof LeaguesSlugScheduleRoute
+  LeaguesSlugSpeedRoute: typeof LeaguesSlugSpeedRoute
   LeaguesSlugStandingsRoute: typeof LeaguesSlugStandingsRoute
-  LeaguesSlugTeamsRoute: typeof LeaguesSlugTeamsRouteWithChildren
   LeaguesSlugTradesRoute: typeof LeaguesSlugTradesRoute
   LeaguesSlugIndexRoute: typeof LeaguesSlugIndexRoute
+  LeaguesSlugTeamsMemberIdRoute: typeof LeaguesSlugTeamsMemberIdRoute
+  LeaguesSlugTeamsIndexRoute: typeof LeaguesSlugTeamsIndexRoute
 }
 
 const LeaguesSlugRouteChildren: LeaguesSlugRouteChildren = {
@@ -413,10 +423,12 @@ const LeaguesSlugRouteChildren: LeaguesSlugRouteChildren = {
   LeaguesSlugPointsRoute: LeaguesSlugPointsRoute,
   LeaguesSlugPoolRoute: LeaguesSlugPoolRoute,
   LeaguesSlugScheduleRoute: LeaguesSlugScheduleRoute,
+  LeaguesSlugSpeedRoute: LeaguesSlugSpeedRoute,
   LeaguesSlugStandingsRoute: LeaguesSlugStandingsRoute,
-  LeaguesSlugTeamsRoute: LeaguesSlugTeamsRouteWithChildren,
   LeaguesSlugTradesRoute: LeaguesSlugTradesRoute,
   LeaguesSlugIndexRoute: LeaguesSlugIndexRoute,
+  LeaguesSlugTeamsMemberIdRoute: LeaguesSlugTeamsMemberIdRoute,
+  LeaguesSlugTeamsIndexRoute: LeaguesSlugTeamsIndexRoute,
 }
 
 const LeaguesSlugRouteWithChildren = LeaguesSlugRoute._addFileChildren(

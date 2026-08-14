@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { post, request } from '../lib/api'
 import { useLeagueSocket } from '../lib/socket'
-import { Badge, Card, Countdown, Empty, ErrorBar, Sprite, StatBar } from '../ui'
+import { Badge, Card, Countdown, Empty, ErrorBar, Sprite, StatBar, TierChip } from '../ui'
 import { teamName, useLeague } from './leagues.$slug'
 
 export const Route = createFileRoute('/leagues/$slug/draft')({ component: DraftRoom })
@@ -26,7 +26,7 @@ type PoolRow = {
   speciesId: string
   points: number
   takenBy: string | null
-  species: { name: string; types: string[]; bst: number } | null
+  species: { name: string; types: string[]; bst: number; tier: string | null } | null
 }
 
 function DraftRoom() {
@@ -179,6 +179,7 @@ function DraftRoom() {
                   <th style={{ width: 52 }} />
                   <th>Pokémon</th>
                   <th className="hide-sm">Types</th>
+                  <th>Tier</th>
                   <th className="r">BST</th>
                   <th className="r">Cost</th>
                   <th />
@@ -207,6 +208,13 @@ function DraftRoom() {
                             </span>
                           ))}
                         </span>
+                      </td>
+                      <td>
+                        {p.species?.tier ? (
+                          <TierChip tier={p.species.tier} />
+                        ) : (
+                          <span className="faint">—</span>
+                        )}
                       </td>
                       <td className="r faint">{p.species?.bst ?? '—'}</td>
                       <td className="r">

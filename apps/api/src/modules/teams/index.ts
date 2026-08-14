@@ -38,6 +38,7 @@ const MonSchema = t.Object({
   forme: t.Nullable(t.String()),
   cost: t.Integer(),
   acquired: t.Union([t.Literal('draft'), t.Literal('trade')]),
+  smogonUrl: t.String(),
 })
 
 async function membersOf(leagueId: string) {
@@ -225,10 +226,59 @@ export const teamsModule = new Elysia({ prefix: '/leagues/:id', tags: ['teams'] 
           base: t.Integer(),
           neutral: t.Integer(),
           positive: t.Integer(),
+          negative: t.Integer(),
           scarf: t.Integer(),
+          minimum: t.Integer(),
           leaguePercentile: t.Integer(),
         }),
       ),
+    },
+  )
+
+  /**
+   * One speed list for the whole league. Speed only means anything relative to
+   * what everyone else drafted, so the comparison belongs at league scope
+   * rather than repeated per team.
+   */
+  .get(
+    '/speed',
+    async ({ league }) => {
+      const [members, rosters] = await Promise.all([
+        membersOf(league.id),
+        leagueRosters(db, league.id),
+      ])
+      const nameOf = new Map(
+        members.map((m) => [m.id, m.profileName ?? m.teamName ?? m.displayName ?? m.name]),
+      )
+
+      const rows = [...rosters.entries()].flatMap(([memberId, roster]) =>
+        speedTiers(hydrateRoster(roster.entries, league.formatId)).map((row) => ({
+          ...row,
+          memberId,
+          teamName: nameOf.get(memberId) ?? 'Unknown',
+        })),
+      )
+
+      return rows.sort((a, b) => b.base - a.base || a.name.localeCompare(b.name))
+    },
+    {
+      league: 'public',
+      params: t.Object({ id: t.String() }),
+      response: t.Array(
+        t.Object({
+          speciesId: t.String(),
+          name: t.String(),
+          base: t.Integer(),
+          neutral: t.Integer(),
+          positive: t.Integer(),
+          negative: t.Integer(),
+          scarf: t.Integer(),
+          minimum: t.Integer(),
+          memberId: t.String(),
+          teamName: t.String(),
+        }),
+      ),
+      detail: { summary: 'Every drafted mon in the league, fastest first.' },
     },
   )
 
@@ -305,7 +355,7 @@ export const teamsModule = new Elysia({ prefix: '/leagues/:id', tags: ['teams'] 
             points: e.points,
             banned: e.banned,
             takenBy: takenBy.get(e.speciesId) ?? null,
-            species: s ? toCard(s) : null,
+            species: s ? toCard(s, league.formatId) : null,
           }
         })
     },

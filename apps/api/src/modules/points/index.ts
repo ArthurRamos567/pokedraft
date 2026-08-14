@@ -107,7 +107,7 @@ export const pointsModule = new Elysia({ prefix: '/leagues/:id/points', tags: ['
         // points are stored.
         entries: entries.map((e) => {
           const s = getSpeciesForFormat(e.speciesId, league.formatId)
-          return { ...e, species: s ? toCard(s) : null }
+          return { ...e, species: s ? toCard(s, league.formatId) : null }
         }),
       }
     },

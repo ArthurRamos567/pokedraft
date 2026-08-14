@@ -2,7 +2,15 @@ import { describe, expect, it } from 'bun:test'
 import { movePool } from './learnsets'
 import { formatPool } from './legality'
 import { searchSpecies } from './search'
-import { canonicalize, getSpecies, isCosmeticForme, toDetail } from './species'
+import {
+  canonicalize,
+  getSpecies,
+  getSpeciesForFormat,
+  isCosmeticForme,
+  tierForFormat,
+  toCard,
+  toDetail,
+} from './species'
 
 describe('formes', () => {
   it('treats a cosmetic forme as cosmetic and collapses it', () => {
@@ -46,6 +54,42 @@ describe('species detail', () => {
     const d = toDetail(getSpecies('rotomwash')!)
     expect(d.otherFormes).toContain('Rotom-Heat')
     expect(d.otherFormes).not.toContain('Rotom-Wash')
+  })
+})
+
+/**
+ * The tier a card shows has to be the tier of the league's own metagame. A
+ * National Dex league that reads the SV singles column labels half its pool
+ * `Illegal`, which is both wrong and the loudest thing on the row.
+ */
+describe('tier by format', () => {
+  const tier = (id: string, format: string) =>
+    tierForFormat(getSpeciesForFormat(id, format)!, format)
+
+  it('reads the national dex column for a national dex format', () => {
+    expect(tier('tapukoko', 'gen9ou')).toBe('Illegal')
+    expect(tier('tapukoko', 'gen9nationaldex')).toBe('OU')
+    expect(tier('kartana', 'gen8nationaldex')).toBe('OU')
+  })
+
+  it('reads the doubles column for doubles and VGC', () => {
+    expect(tier('landorustherian', 'gen9doublesou')).toBe('DOU')
+    expect(tier('landorustherian', 'gen9vgc2025regi')).toBe('DOU')
+    expect(tier('landorustherian', 'gen9ou')).toBe('OU')
+  })
+
+  it('reads the generation the format is played in', () => {
+    expect(tier('blissey', 'gen7ou')).toBe('UU')
+    expect(tier('blissey', 'gen9ou')).toBe('RU')
+    // Mega Charizard X was OU in SwSh National Dex and dropped in SV's.
+    expect(tier('charizardmegax', 'gen8nationaldex')).toBe('OU')
+    expect(tier('charizardmegax', 'gen9nationaldex')).toBe('UUBL')
+  })
+
+  it('flows through the card the API actually returns', () => {
+    const s = getSpeciesForFormat('charizardmegax', 'gen8nationaldex')!
+    expect(toCard(s, 'gen8nationaldex').tier).toBe('OU')
+    expect(toCard(s, 'gen8ou').tier).toBe('Illegal')
   })
 })
 

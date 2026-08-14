@@ -53,7 +53,7 @@ export function searchSpecies(query: SpeciesQuery = {}): {
   const cards: SpeciesCard[] = []
   for (const s of allSpecies(genNum)) {
     if (!matches(s)) continue
-    const card = toCard(s)
+    const card = toCard(s, query.format)
     if (query.minBst !== undefined && card.bst < query.minBst) continue
     if (query.maxBst !== undefined && card.bst > query.maxBst) continue
     cards.push(card)

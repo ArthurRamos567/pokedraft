@@ -64,7 +64,7 @@ export const dexModule = new Elysia({ prefix: '/dex', tags: ['dex'] })
 
       const legality = checkLegality(s.id, format)
       return {
-        ...toDetail(s),
+        ...toDetail(s, format),
         legal: {
           format,
           legal: legality.legal,

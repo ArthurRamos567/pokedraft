@@ -31,7 +31,30 @@ export type SpeciesDetail = SpeciesCard & {
   nonstandard: string | null
 }
 
-export function toCard(s: Species): SpeciesCard {
+const DOUBLES_FORMAT = /doubles|vgc|bss|battlestadium|freeforall/
+
+/**
+ * Showdown keeps three tier lists per species and a format reads exactly one:
+ * `tier` is the generation's standard singles ladder, `natDexTier` is National
+ * Dex, `doublesTier` is doubles. Reading the wrong one is how Tapu Koko ends
+ * up labelled `Illegal` in a National Dex league — it is illegal in SV OU and
+ * OU in SV National Dex, and both facts live on the same species object.
+ *
+ * The generation is already decided by which dex `s` came from; this only
+ * picks the column.
+ */
+export function tierForFormat(s: Species, formatId: string): string | null {
+  const id = formatId.toLowerCase()
+  const raw = id.includes('nationaldex')
+    ? s.natDexTier
+    : DOUBLES_FORMAT.test(id)
+      ? s.doublesTier
+      : s.tier
+  // Species with no ranking in that list carry an empty string, not undefined.
+  return raw || null
+}
+
+export function toCard(s: Species, formatId?: string): SpeciesCard {
   return {
     id: s.id,
     name: s.name,
@@ -40,7 +63,7 @@ export function toCard(s: Species): SpeciesCard {
     abilities: Object.values(s.abilities).filter(Boolean) as string[],
     baseStats: { ...s.baseStats },
     bst: s.bst,
-    tier: s.tier ?? null,
+    tier: formatId ? tierForFormat(s, formatId) : s.tier || null,
     baseSpecies: s.baseSpecies === s.name ? null : s.baseSpecies,
     forme: s.forme || null,
   }
@@ -99,7 +122,8 @@ export function evolutionLine(s: Species, genNum: GenerationNum = 9): string[] {
   return line
 }
 
-export function toDetail(s: Species, genNum: GenerationNum = 9): SpeciesDetail {
+export function toDetail(s: Species, formatId = 'gen9ou'): SpeciesDetail {
+  const genNum = genOfFormat(formatId)
   const dex = dexFor(genNum)
   const base = s.baseSpecies ? dex.species.get(toID(s.baseSpecies)) : undefined
   const siblings = (base?.formeOrder ?? s.formeOrder ?? [])
@@ -110,7 +134,7 @@ export function toDetail(s: Species, genNum: GenerationNum = 9): SpeciesDetail {
     })
 
   return {
-    ...toCard(s),
+    ...toCard(s, formatId),
     weightkg: s.weightkg,
     eggGroups: [...(s.eggGroups ?? [])],
     prevo: s.prevo ?? null,

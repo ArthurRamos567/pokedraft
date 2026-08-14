@@ -1,24 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { request } from '../lib/api'
-import { Card, Empty, Sprite, StatBar, TypeChip } from '../ui'
+import { API_URL, request } from '../lib/api'
+import { Card, Empty, Sprite, StatBar, TierChip, TypeChip } from '../ui'
 import { useLeague } from './leagues.$slug'
 
 export const Route = createFileRoute('/leagues/$slug/teams/$memberId')({ component: TeamPage })
 
+type Mon = {
+  id: string
+  name: string
+  types: string[]
+  abilities: string[]
+  baseStats: Record<string, number>
+  bst: number
+  tier: string | null
+  cost: number
+  acquired: string
+  smogonUrl: string
+}
+
 type Detail = {
   memberId: string
   teamName: string | null
-  roster: {
-    id: string
-    name: string
-    types: string[]
-    abilities: string[]
-    baseStats: Record<string, number>
-    bst: number
-    cost: number
-    acquired: string
-  }[]
+  roster: Mon[]
   spend: { spent: number; remaining: number; budget: number; brackets: Record<string, number> }
   stats: {
     bstAverage: number
@@ -38,16 +42,6 @@ type Coverage = {
   holes: string[]
 }
 
-type Speed = {
-  speciesId: string
-  name: string
-  base: number
-  neutral: number
-  positive: number
-  scarf: number
-  leaguePercentile: number
-}[]
-
 /** The multiplier decides the colour; the number is only confirmation. */
 const heatClass = (m: number) =>
   m === 0
@@ -63,6 +57,93 @@ const heatClass = (m: number) =>
             : 'heat-quarter'
 
 const fmt = (m: number) => (m === 1 ? '—' : m === 0.5 ? '½' : m === 0.25 ? '¼' : `${m}×`)
+
+const STATS = [
+  ['hp', 'HP'],
+  ['atk', 'Atk'],
+  ['def', 'Def'],
+  ['spa', 'SpA'],
+  ['spd', 'SpD'],
+  ['spe', 'Spe'],
+] as const
+
+/** Smogon's scale: a bar is read against 255, and the hue carries the verdict. */
+function statTone(v: number) {
+  const hue = Math.min(v, 160) / 160 // 160 is roughly where a stat stops being notable
+  return `hsl(${Math.round(hue * 122)} 62% ${42 + hue * 8}%)`
+}
+
+function StatSpread({ mon }: { mon: Mon }) {
+  return (
+    <div className="statgrid">
+      {STATS.map(([key, label]) => {
+        const v = mon.baseStats[key] ?? 0
+        return (
+          <div key={key} className="stat">
+            <span className="stat-key">{label}</span>
+            <span className="stat-val">{v}</span>
+            <span className="stat-track">
+              <span
+                className="stat-fill"
+                style={{ width: `${Math.min(100, (v / 255) * 100)}%`, background: statTone(v) }}
+              />
+            </span>
+          </div>
+        )
+      })}
+      <div className="stat stat-bst">
+        <span className="stat-key">BST</span>
+        <span className="stat-val">{mon.bst}</span>
+        <span className="stat-track">
+          <span
+            className="stat-fill"
+            style={{
+              width: `${Math.min(100, (mon.bst / 720) * 100)}%`,
+              background: 'var(--text-3)',
+            }}
+          />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function MonRow({ mon }: { mon: Mon }) {
+  return (
+    <article className="mon-row">
+      <div className="mon-id">
+        <Sprite species={mon.id} size="lg" />
+        <div className="stack" style={{ gap: 5, minWidth: 0 }}>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <a className="mon-name" href={mon.smogonUrl} target="_blank" rel="noreferrer">
+              {mon.name}
+              <span aria-hidden> ↗</span>
+            </a>
+            {mon.tier && <TierChip tier={mon.tier} />}
+            {mon.acquired === 'trade' && <span className="badge">traded</span>}
+          </div>
+          <div className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
+            {mon.types.map((t) => (
+              <TypeChip key={t} type={t} />
+            ))}
+          </div>
+          <div className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
+            {mon.abilities.map((a, i) => (
+              <span
+                key={a}
+                className={i === mon.abilities.length - 1 && i > 0 ? 'abil abil-h' : 'abil'}
+              >
+                {a}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span className="cost mon-cost">{mon.cost}</span>
+      </div>
+      <StatSpread mon={mon} />
+    </article>
+  )
+}
 
 function TeamPage() {
   const { slug, memberId } = Route.useParams()
@@ -80,12 +161,6 @@ function TeamPage() {
     queryFn: () => request<Coverage>(`${base}/coverage`),
     enabled: !!leagueId,
   })
-  const { data: speed } = useQuery({
-    queryKey: ['league', slug, 'team', memberId, 'speed'],
-    queryFn: () => request<Speed>(`${base}/speed`),
-    enabled: !!leagueId,
-  })
-
   if (!data) return <Empty>Loading team…</Empty>
   if (data.roster.length === 0) return <Empty>This team has not drafted anything yet.</Empty>
 
@@ -99,52 +174,10 @@ function TeamPage() {
           actions={<span className="label">{data.roster.length} mons</span>}
           pad={false}
         >
-          <div className="scroll-x">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th style={{ width: 60 }} />
-                  <th>Pokémon</th>
-                  <th>Types</th>
-                  <th className="hide-sm">Ability</th>
-                  <th className="r">Spe</th>
-                  <th className="r">BST</th>
-                  <th className="r">Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.roster.map((m) => (
-                  <tr key={m.id}>
-                    <td>
-                      <Sprite species={m.id} />
-                    </td>
-                    <td>
-                      <strong style={{ fontSize: 13 }}>{m.name}</strong>
-                      {m.acquired === 'trade' && (
-                        <span className="badge" style={{ marginLeft: 6 }}>
-                          traded
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <span className="row" style={{ gap: 4 }}>
-                        {m.types.map((t) => (
-                          <TypeChip key={t} type={t} />
-                        ))}
-                      </span>
-                    </td>
-                    <td className="hide-sm faint" style={{ fontSize: 12 }}>
-                      {m.abilities[0] ?? '—'}
-                    </td>
-                    <td className="r">{m.baseStats.spe}</td>
-                    <td className="r faint">{m.bst}</td>
-                    <td className="r">
-                      <span className="cost">{m.cost}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mon-list">
+            {data.roster.map((m) => (
+              <MonRow key={m.id} mon={m} />
+            ))}
           </div>
         </Card>
 
@@ -168,20 +201,15 @@ function TeamPage() {
             </div>
           </Card>
 
-          <Card title="Profile">
-            <dl className="stack" style={{ gap: 8, margin: 0 }}>
-              {[
-                ['Average BST', String(data.stats.bstAverage)],
-                ['Physical / special', `${data.stats.physical} / ${data.stats.special}`],
-                ['Fastest', data.stats.fastest?.name ?? '—'],
-                ['Bulkiest', data.stats.bulkiest?.name ?? '—'],
-              ].map(([k, v]) => (
-                <div key={k} className="row-between">
-                  <dt className="label">{k}</dt>
-                  <dd style={{ margin: 0, fontSize: 13 }}>{v}</dd>
-                </div>
-              ))}
-            </dl>
+          <Card title="Export">
+            <div className="stack" style={{ gap: 8 }}>
+              <p className="dim" style={{ margin: 0, fontSize: 13 }}>
+                A paste skeleton for the teambuilder — species, ability and typing only.
+              </p>
+              <a className="btn" href={`${API_URL}${base}/export`} target="_blank" rel="noreferrer">
+                Open Showdown paste
+              </a>
+            </div>
           </Card>
         </div>
       </div>
@@ -227,44 +255,7 @@ function TeamPage() {
                 </tbody>
               </table>
             </div>
-            {coverage.holes.length > 0 && (
-              <p className="dim" style={{ margin: 0, fontSize: 13 }}>
-                Nothing on this team resists{' '}
-                <strong style={{ color: 'var(--bad)' }}>{coverage.holes.join(', ')}</strong>.
-              </p>
-            )}
           </div>
-        </Card>
-      )}
-
-      {speed && speed.length > 0 && (
-        <Card title="Speed tiers" pad={false}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Pokémon</th>
-                <th className="r">Base</th>
-                <th className="r">Neutral</th>
-                <th className="r">+Nature</th>
-                <th className="r">Scarf</th>
-                <th className="r">League %ile</th>
-              </tr>
-            </thead>
-            <tbody>
-              {speed.map((s) => (
-                <tr key={s.speciesId}>
-                  <td>{s.name}</td>
-                  <td className="r">{s.base}</td>
-                  <td className="r faint">{s.neutral}</td>
-                  <td className="r">{s.positive}</td>
-                  <td className="r" style={{ color: 'var(--pick)' }}>
-                    {s.scarf}
-                  </td>
-                  <td className="r">{s.leaguePercentile}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </Card>
       )}
     </div>

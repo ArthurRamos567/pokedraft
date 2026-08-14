@@ -4,20 +4,32 @@ import {
   getSpeciesForFormat,
   offensiveCoverage,
   type SpeciesCard,
+  smogonUrl,
   teamDefense,
   toCard,
   typeNames,
 } from '@pokedraft/dex'
 import type { RosterEntry } from './roster'
 
-export type TeamMon = SpeciesCard & { cost: number; acquired: 'draft' | 'trade' }
+export type TeamMon = SpeciesCard & {
+  cost: number
+  acquired: 'draft' | 'trade'
+  /** The analysis for *this league's* format, not a generic dex entry. */
+  smogonUrl: string
+}
 
 export function hydrateRoster(entries: RosterEntry[], formatId: string): TeamMon[] {
   const out: TeamMon[] = []
   for (const e of entries) {
     const s = getSpeciesForFormat(e.speciesId, formatId)
     if (!s) continue
-    out.push({ ...toCard(s), cost: e.cost, acquired: e.acquired })
+    const card = toCard(s, formatId)
+    out.push({
+      ...card,
+      cost: e.cost,
+      acquired: e.acquired,
+      smogonUrl: smogonUrl(card.name, formatId),
+    })
   }
   return out
 }
@@ -52,14 +64,18 @@ export type SpeedRow = {
   speciesId: string
   name: string
   base: number
-  /** The three numbers people actually compare at level 100. */
+  /** The numbers people actually compare at level 100, all at 31 IVs / 252 EVs… */
   neutral: number
   positive: number
+  negative: number
   scarf: number
+  /** …except this one: 0 IVs, 0 EVs, hindering nature — the Trick Room floor. */
+  minimum: number
 }
 
-const atLevel100 = (base: number, nature: number) =>
-  Math.floor(Math.floor(((2 * base + 31 + 63) * 100) / 100 + 5) * nature)
+/** floor((2·base + IV + EV/4) · level/100 + 5), then the nature multiplier. */
+const atLevel100 = (base: number, nature: number, iv = 31, ev = 252) =>
+  Math.floor(Math.floor(((2 * base + iv + Math.floor(ev / 4)) * 100) / 100 + 5) * nature)
 
 export function speedTiers(mons: TeamMon[]): SpeedRow[] {
   return mons
@@ -72,7 +88,9 @@ export function speedTiers(mons: TeamMon[]): SpeedRow[] {
         base,
         neutral: atLevel100(base, 1),
         positive,
+        negative: atLevel100(base, 0.9),
         scarf: Math.floor(positive * 1.5),
+        minimum: atLevel100(base, 0.9, 0, 0),
       }
     })
     .sort((a, b) => b.base - a.base || a.name.localeCompare(b.name))

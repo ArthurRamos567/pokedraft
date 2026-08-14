@@ -1,3 +1,4 @@
+import { Sprites } from '@pkmn/img'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
@@ -6,6 +7,49 @@ export function TypeChip({ type }: { type: string }) {
   return (
     <span className="type" style={{ ['--tc' as string]: `var(--type-${type.toLowerCase()})` }}>
       {type.slice(0, 3)}
+    </span>
+  )
+}
+
+/**
+ * Smogon's ladder is a ranking, so the chip is a ramp: the higher the shelf,
+ * the hotter the colour. `BL` sits with the tier it is banned from, because
+ * that is what the name means. A parenthesised tier — `(OU)`, `(DUU)` — is
+ * Showdown saying "legal there, nobody uses it"; same hue, spoken quieter.
+ */
+const TIER_RAMP: Record<string, string> = {
+  AG: 'var(--bad)',
+  Uber: 'var(--bad)',
+  OU: 'var(--live)',
+  OUBL: 'var(--live)',
+  DUber: 'var(--bad)',
+  DOU: 'var(--live)',
+  DBL: 'var(--live)',
+  UU: 'var(--pick)',
+  UUBL: 'var(--pick)',
+  DUU: 'var(--pick)',
+  RU: 'var(--good)',
+  RUBL: 'var(--good)',
+  NU: 'var(--type-grass)',
+  NUBL: 'var(--type-grass)',
+  PU: 'var(--type-steel)',
+  PUBL: 'var(--type-steel)',
+  ZU: 'var(--type-steel)',
+  NFE: 'var(--text-3)',
+  LC: 'var(--type-fairy)',
+}
+
+export function TierChip({ tier }: { tier: string }) {
+  const bare = tier.replace(/[()]/g, '')
+  const unused = bare !== tier
+  const colour = TIER_RAMP[bare] ?? 'var(--text-3)'
+  return (
+    <span
+      className={unused ? 'tier tier-unused' : 'tier'}
+      style={{ ['--tier-c' as string]: colour }}
+      title={unused ? `${bare} — legal, unused` : bare}
+    >
+      {tier}
     </span>
   )
 }
@@ -27,20 +71,40 @@ export function Badge({
   )
 }
 
-/** Showdown's CDN sprite. The API returns ids; the client picks the style. */
+/**
+ * Showdown's CDN sprite. The API returns ids; `@pkmn/img` maps an id to the
+ * right directory and filename — a hand-built `/sprites/gen5/<id>.png` misses
+ * every forme (`latias-mega`) and everything drawn after gen 5.
+ */
 export function Sprite({ species, size = 'md' }: { species: string; size?: 'sm' | 'md' | 'lg' }) {
   const cls = size === 'sm' ? 'sprite sprite-sm' : size === 'lg' ? 'sprite sprite-lg' : 'sprite'
+  const { url, pixelated } = Sprites.getPokemon(species, { gen: 'ani' })
   return (
     <img
       className={cls}
       alt=""
       loading="lazy"
-      src={`https://play.pokemonshowdown.com/sprites/gen5/${species}.png`}
+      src={url}
+      style={pixelated ? undefined : { imageRendering: 'auto' }}
       onError={(e) => {
+        // A few formes have no art of their own (greninja-bond); Showdown
+        // draws the base species for them, so fall back to it once.
+        const fallback = baseSpriteUrl(url)
+        if (fallback && e.currentTarget.src !== fallback) {
+          e.currentTarget.src = fallback
+          return
+        }
         e.currentTarget.style.visibility = 'hidden'
       }}
     />
   )
+}
+
+function baseSpriteUrl(url: string): string | null {
+  const file = url.slice(url.lastIndexOf('/') + 1)
+  const base = file.slice(0, file.lastIndexOf('.')).split('-')[0]
+  if (!base || !file.includes('-')) return null
+  return Sprites.getPokemon(base, { gen: 'ani' }).url
 }
 
 export function Card({

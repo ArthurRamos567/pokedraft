@@ -309,6 +309,27 @@ p {
   padding: 16px;
 }
 
+/* A whole card as one hit target — the title alone is a thin thing to aim at. */
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--r-lg);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+.card-link:hover {
+  transform: translateY(-2px);
+}
+.card-link:hover .card {
+  border-color: var(--line-3);
+}
+.card-link:focus-visible {
+  outline: 2px solid var(--live);
+  outline-offset: 2px;
+}
+
 .card-head {
   display: flex;
   align-items: center;
@@ -496,6 +517,30 @@ p {
   border: 1px solid color-mix(in oklab, var(--tc, var(--text-3)) 34%, transparent);
 }
 
+/*
+ * Same micro-chip scale as a type, rounded instead of squared so the two never
+ * read as the same kind of fact. `--tier-c` is the ladder colour, set by the
+ * component.
+ */
+.tier {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tier-c, var(--text-3));
+  background: color-mix(in oklab, var(--tier-c, var(--text-3)) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--tier-c, var(--text-3)) 30%, transparent);
+}
+.tier-unused {
+  opacity: 0.62;
+}
+
 .cost {
   font-family: var(--mono);
   font-weight: 700;
@@ -549,6 +594,8 @@ p {
 .sprite {
   width: 40px;
   height: 30px;
+  /* Sprites vary in size; letterbox rather than stretch a tall one flat. */
+  object-fit: contain;
   image-rendering: pixelated;
   flex: none;
   filter: drop-shadow(0 2px 4px rgb(0 0 0 / 60%));
@@ -857,4 +904,165 @@ p {
   .hide-sm {
     display: none;
   }
+}
+
+/* ── mon dossier ─────────────────────────────────────────────────────────── */
+/* One row per Pokémon: identity on the left, the full spread on the right —
+   the shape a Smogon dex entry uses, at a density that fits ten of them. */
+.mon-list {
+  display: flex;
+  flex-direction: column;
+}
+.mon-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 42%);
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.mon-row:last-child {
+  border-bottom: 0;
+}
+.mon-row:hover {
+  background: rgb(255 255 255 / 2%);
+}
+.mon-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.mon-name {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.mon-name:hover {
+  color: var(--live);
+}
+.mon-cost {
+  margin-left: auto;
+  font-size: 15px;
+}
+.abil {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-2);
+  background: var(--ink-600);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+}
+/* The last listed ability is the hidden one whenever there is more than one. */
+.abil-h {
+  color: var(--gold);
+  border-color: rgb(245 196 81 / 25%);
+}
+
+.statgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 14px;
+}
+.stat {
+  display: grid;
+  grid-template-columns: 30px 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+.stat-key {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.stat-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: right;
+  color: var(--text);
+}
+.stat-track,
+.speed-track {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ink-500);
+  overflow: hidden;
+}
+.speed-track {
+  flex: 1;
+  min-width: 60px;
+}
+.stat-fill,
+.speed-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+.speed-fill {
+  background: linear-gradient(90deg, var(--pick), var(--live));
+}
+.stat-bst .stat-val {
+  color: var(--text-2);
+}
+
+/* ── league speed ladder ─────────────────────────────────────────────────── */
+/*
+ * `--team-c` is set per row by the component, so several selected teams stay
+ * distinguishable once their ladders are interleaved.
+ */
+.speed-mine td {
+  background: color-mix(in oklab, var(--team-c, var(--live)) 8%, transparent);
+}
+.speed-mine td:first-child {
+  box-shadow: inset 2px 0 0 var(--team-c, var(--live));
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: var(--ink-600);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.chip:hover {
+  color: var(--text);
+  border-color: var(--line-3);
+}
+.chip-on {
+  color: var(--ink-900);
+  background: var(--chip-c, var(--live));
+  border-color: var(--chip-c, var(--live));
+}
+
+@media (max-width: 980px) {
+  .mon-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+}
+
+/* A speed band header inside the ladder — the clusters are the point. */
+.band-row td {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--ink-850);
+  padding: 6px 10px;
+  border-top: 1px solid var(--line);
+}
+.band-row:first-child td {
+  border-top: 0;
 }

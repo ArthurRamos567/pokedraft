@@ -16,6 +16,7 @@
     "db:generate": "drizzle-kit generate --config packages/db/drizzle.config.ts",
     "db:migrate": "bun run packages/db/src/migrate.ts",
     "db:studio": "drizzle-kit studio --config packages/db/drizzle.config.ts",
+    "seed": "bun run apps/api/src/scripts/seed-demo.ts",
     "verify": "./scripts/verify.sh"
   },
   "devDependencies": {

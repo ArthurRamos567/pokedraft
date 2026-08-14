@@ -186,6 +186,29 @@ describe('team endpoints', () => {
     expect(team?.team.length).toBe(rows.length)
   })
 
+  it('lists every drafted mon in one league-wide speed order', async () => {
+    const { host, league, members } = await draftedLeague()
+
+    const res = await call(`/leagues/${league.id}/speed`, { headers: { cookie: host.cookie } })
+    const rows = (await res.json()) as { base: number; memberId: string; teamName: string }[]
+
+    expect(rows.length).toBeGreaterThan(1)
+    expect([...rows].sort((a, b) => b.base - a.base)).toEqual(rows)
+    // Both teams appear — a per-team list would only ever show one.
+    expect(new Set(rows.map((r) => r.memberId)).size).toBe(members.length)
+    expect(rows.every((r) => r.teamName.length > 0)).toBe(true)
+  })
+
+  it('links each mon to its analysis for the league format', async () => {
+    const { host, league, members } = await draftedLeague()
+    const res = await call(`/leagues/${league.id}/teams/${members[0]!.id}`, {
+      headers: { cookie: host.cookie },
+    })
+    const { roster } = (await res.json()) as { roster: { smogonUrl: string }[] }
+    expect(roster.every((m) => m.smogonUrl.startsWith('https://www.smogon.com/dex/sv/'))).toBe(true)
+    expect(roster.every((m) => m.smogonUrl.endsWith('/ou/'))).toBe(true)
+  })
+
   it('separates drafted from undrafted in the pool view', async () => {
     const { host, league } = await draftedLeague()
     const res = await call(`/leagues/${league.id}/pool?status=undrafted`, {
@@ -219,6 +242,22 @@ describe('analytics', () => {
     // Skarmory is Steel/Flying: it resisted Dark before gen 6 and doesn't now.
     expect(old.perMon[0]?.matchups.Dark).toBe(0.5)
     expect(modern.perMon[0]?.matchups.Dark).toBe(1)
+  })
+
+  /**
+   * Hand-computed from base 91: 2·91 + 31 + 63 + 5 = 281 at 31 IVs / 252 EVs,
+   * and 2·91 + 5 = 187 at 0/0. Everything else is a nature multiplier.
+   */
+  it('computes every speed line off Landorus-T', () => {
+    const [row] = speedTiers(mons(['landorustherian'], 'gen9nationaldex'))
+    expect(row).toMatchObject({
+      base: 91,
+      neutral: 281,
+      positive: 309,
+      negative: 252,
+      scarf: 463,
+      minimum: 168,
+    })
   })
 
   it('orders speed tiers deterministically on a tie', () => {

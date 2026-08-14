@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { request } from '../lib/api'
-import { Card, Empty, Sprite, TypeChip } from '../ui'
+import { Card, Empty, Sprite, TierChip, TypeChip } from '../ui'
 import { teamName, useLeague } from './leagues.$slug'
 
 export const Route = createFileRoute('/leagues/$slug/pool')({ component: Pool })
@@ -105,7 +105,13 @@ function Pool() {
                     ))}
                   </span>
                 </td>
-                <td className="hide-sm faint">{r.species?.tier ?? '—'}</td>
+                <td className="hide-sm">
+                  {r.species?.tier ? (
+                    <TierChip tier={r.species.tier} />
+                  ) : (
+                    <span className="faint">—</span>
+                  )}
+                </td>
                 <td className="r faint">{r.species?.bst ?? '—'}</td>
                 <td className="r">
                   <span className="cost">{r.points}</span>
