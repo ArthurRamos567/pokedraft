@@ -48,10 +48,13 @@ services:
       PORT: 3000
       DATABASE_URL: ${DATABASE_URL}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
-      # Public https URL of the API domain — Better Auth signs callbacks with it.
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?set BETTER_AUTH_URL}
-      # Public https URL of the web domain — CORS and cookie trust hang off it.
-      WEB_ORIGIN: ${WEB_ORIGIN:?set WEB_ORIGIN}
+      # Origin only, no path: Better Auth appends its own /api/auth basePath and
+      # matches incoming requests against the result. A path here would make it
+      # expect that path twice and answer 404 to every auth call.
+      BETTER_AUTH_URL: https://${APP_DOMAIN}
+      # The single origin allowed to send credentials. Same host as the API here,
+      # so requests are first-party and CORS never comes into play.
+      WEB_ORIGIN: https://${APP_DOMAIN}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -73,15 +76,42 @@ services:
     networks:
       - default
       - dokploy-network
+    labels:
+      # One host, two routers. `/api/*` wins on priority and is stripped before
+      # it reaches Elysia, which serves its routes at the root.
+      #
+      # The client's auth calls therefore arrive as /api/api/auth/* and land on
+      # Better Auth's /api/auth/* after the strip. That doubling is deliberate:
+      # the outer /api routes to this service, the inner one is Better Auth's
+      # own basePath.
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.pokedraft-api.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`) && PathPrefix(`/api`)
+      - traefik.http.routers.pokedraft-api.entrypoints=websecure
+      - traefik.http.routers.pokedraft-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.pokedraft-api.priority=20
+      - traefik.http.routers.pokedraft-api.service=pokedraft-api
+      - traefik.http.routers.pokedraft-api.middlewares=pokedraft-api-strip
+      - traefik.http.middlewares.pokedraft-api-strip.stripprefix.prefixes=/api
+      - traefik.http.services.pokedraft-api.loadbalancer.server.port=3000
+      # /api/auth/* passes through unstripped, because that is Better Auth's own
+      # path. Only OAuth callbacks arrive here — the browser's own auth calls go
+      # through the stripped router above — but a redirect from Discord or
+      # Google lands on exactly this URL and must not be rewritten.
+      - traefik.http.routers.pokedraft-auth.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`) && PathPrefix(`/api/auth`)
+      - traefik.http.routers.pokedraft-auth.entrypoints=websecure
+      - traefik.http.routers.pokedraft-auth.tls.certresolver=letsencrypt
+      - traefik.http.routers.pokedraft-auth.priority=30
+      - traefik.http.routers.pokedraft-auth.service=pokedraft-api
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        # Baked into the client bundle at build time, so changing the API domain
-        # means a rebuild, not a restart. Same value as BETTER_AUTH_URL.
-        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL}
+        # Baked into the client bundle at build time, so changing the domain
+        # means a rebuild, not a restart. The websocket URL is derived from it.
+        VITE_API_URL: https://${APP_DOMAIN:?set APP_DOMAIN}/api
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -94,6 +124,26 @@ services:
     networks:
       - default
       - dokploy-network
+    labels:
+      # Catch-all: everything the API router didn't claim. Lower priority, so
+      # /api never reaches the SSR server.
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.pokedraft-web.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`)
+      - traefik.http.routers.pokedraft-web.entrypoints=websecure
+      - traefik.http.routers.pokedraft-web.tls.certresolver=letsencrypt
+      - traefik.http.routers.pokedraft-web.priority=10
+      - traefik.http.routers.pokedraft-web.service=pokedraft-web
+      - traefik.http.services.pokedraft-web.loadbalancer.server.port=5173
+      # Plain http exists only to redirect. ACME's own router outranks this one,
+      # so the certificate challenge still gets through.
+      - traefik.http.routers.pokedraft-http.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`)
+      - traefik.http.routers.pokedraft-http.entrypoints=web
+      - traefik.http.routers.pokedraft-http.priority=1
+      - traefik.http.routers.pokedraft-http.service=pokedraft-web
+      - traefik.http.routers.pokedraft-http.middlewares=pokedraft-https
+      - traefik.http.middlewares.pokedraft-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.pokedraft-https.redirectscheme.permanent=true
 
 volumes:
   pgdata:
