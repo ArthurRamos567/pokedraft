@@ -98,7 +98,6 @@ function DraftRoom() {
       .filter((p) => !state || !(p.speciesId in state.taken))
       .filter((p) => !needle || p.speciesId.includes(needle))
       .sort((a, b) => b.points - a.points || a.speciesId.localeCompare(b.speciesId))
-      .slice(0, 120)
   }, [pool, q, state])
 
   if (isLoading) return <Empty>Loading the room…</Empty>
