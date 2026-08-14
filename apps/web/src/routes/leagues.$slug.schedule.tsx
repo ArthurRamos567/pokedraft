@@ -31,6 +31,7 @@ function Schedule() {
   const { data: league } = useLeague(slug)
   const leagueId = league?.league.id
   const myId = league?.me?.memberId ?? null
+  const isHost = league?.me?.role === 'host' || league?.me?.role === 'cohost'
 
   const { data } = useQuery({
     queryKey: ['league', slug, 'schedule'],
@@ -53,7 +54,13 @@ function Schedule() {
     onError: setError,
   })
 
-  if (!data?.season) return <Empty>No season generated yet.</Empty>
+  if (!data?.season) {
+    return isHost ? (
+      <GenerateSeason slug={slug} leagueId={leagueId!} nameOf={nameOf} />
+    ) : (
+      <Empty>No season generated yet.</Empty>
+    )
+  }
 
   return (
     <div className="stack" style={{ gap: 14 }}>
@@ -160,6 +167,133 @@ function Schedule() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+type SeasonPreview = {
+  hash: string
+  warnings: string[]
+  weeks: { number: number; matchups: { home: string; away: string | null }[] }[]
+}
+
+/**
+ * The league sits in `drafting` until a season is committed — this is the step
+ * between a finished draft and any standings, and therefore any bracket.
+ */
+function GenerateSeason({
+  slug,
+  leagueId,
+  nameOf,
+}: {
+  slug: string
+  leagueId: string
+  nameOf: (id: string | null) => string
+}) {
+  const qc = useQueryClient()
+  const [doubleRoundRobin, setDouble] = useState(false)
+  const [weekLengthDays, setWeekLength] = useState(7)
+  const [preview, setPreview] = useState<SeasonPreview | null>(null)
+  const [error, setError] = useState<unknown>(null)
+  const [busy, setBusy] = useState(false)
+
+  const body = { doubleRoundRobin, weekLengthDays }
+
+  const run = (path: 'preview' | 'commit') => {
+    setBusy(true)
+    setError(null)
+    post<SeasonPreview>(`/leagues/${leagueId}/season/${path}`, {
+      ...body,
+      ...(path === 'commit' ? { hash: preview?.hash } : {}),
+    })
+      .then((res) => {
+        if (path === 'preview') setPreview(res)
+        else void qc.invalidateQueries({ queryKey: ['league', slug] })
+      })
+      .catch(setError)
+      .finally(() => setBusy(false))
+  }
+
+  return (
+    <div className="stack" style={{ gap: 14 }}>
+      <Card title="Generate the season">
+        <div className="stack" style={{ gap: 12 }}>
+          <p className="dim" style={{ margin: 0 }}>
+            Round robin over every active team. Nothing is written until you commit the schedule you
+            were shown.
+          </p>
+          <div className="wrap-row" style={{ gap: 16 }}>
+            <label className="row" style={{ gap: 8, fontSize: 13 }}>
+              <input
+                type="checkbox"
+                checked={doubleRoundRobin}
+                onChange={(e) => {
+                  setDouble(e.target.checked)
+                  setPreview(null)
+                }}
+              />
+              Double round robin
+            </label>
+            <label className="field" style={{ maxWidth: 160 }}>
+              <span className="label">Days per week</span>
+              <input
+                className="input num"
+                type="number"
+                min={1}
+                max={28}
+                value={weekLengthDays}
+                onChange={(e) => {
+                  setWeekLength(Number(e.target.value))
+                  setPreview(null)
+                }}
+              />
+            </label>
+          </div>
+          <ErrorBar error={error} />
+          <div className="wrap-row">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={busy}
+              onClick={() => run('preview')}
+            >
+              Preview
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={busy || !preview}
+              onClick={() => run('commit')}
+            >
+              Start the season
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {preview?.warnings.map((w) => (
+        <div key={w} className="badge badge-live" style={{ alignSelf: 'flex-start' }}>
+          {w}
+        </div>
+      ))}
+
+      {preview?.weeks.map((w) => (
+        <Card key={w.number} title={`Week ${w.number}`} pad={false}>
+          <table className="table">
+            <tbody>
+              {w.matchups.map((m) => (
+                <tr key={`${m.home}-${m.away ?? 'bye'}`}>
+                  <td style={{ width: '45%' }}>{nameOf(m.home)}</td>
+                  <td className="r faint" style={{ width: 40 }}>
+                    vs
+                  </td>
+                  <td>{nameOf(m.away)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      ))}
     </div>
   )
 }
