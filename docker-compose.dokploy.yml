@@ -1,9 +1,11 @@
 # Dokploy stack — db + migrate + api + web, no published ports.
 #
-# Dokploy's Traefik reaches a container only over the shared `dokploy-network`,
-# and routes by the domain you attach in the UI (web → 5173, api → 3000).
+# Routing lives in the Traefik labels below, not in Dokploy's Domains tab —
+# a domain added there is a second router for the same host, and whichever wins
+# takes the whole site with it. Leave that tab empty. See DEPLOY.md.
+#
 # Publishing host ports here would expose Postgres and the API on the VPS's
-# public interface, bypassing that. See DEPLOY.md.
+# public interface, bypassing Traefik entirely.
 #
 # Every variable comes from the stack's Environment tab in Dokploy, which is
 # written to .env next to this file before `docker compose up`.
@@ -89,7 +91,7 @@ services:
       - traefik.http.routers.pokedraft-api.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.routers.pokedraft-api.entrypoints=websecure
       - traefik.http.routers.pokedraft-api.tls.certresolver=letsencrypt
-      - traefik.http.routers.pokedraft-api.priority=20
+      - traefik.http.routers.pokedraft-api.priority=2000
       - traefik.http.routers.pokedraft-api.service=pokedraft-api
       - traefik.http.routers.pokedraft-api.middlewares=pokedraft-api-strip
       - traefik.http.middlewares.pokedraft-api-strip.stripprefix.prefixes=/api
@@ -101,7 +103,7 @@ services:
       - traefik.http.routers.pokedraft-auth.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`) && PathPrefix(`/api/auth`)
       - traefik.http.routers.pokedraft-auth.entrypoints=websecure
       - traefik.http.routers.pokedraft-auth.tls.certresolver=letsencrypt
-      - traefik.http.routers.pokedraft-auth.priority=30
+      - traefik.http.routers.pokedraft-auth.priority=3000
       - traefik.http.routers.pokedraft-auth.service=pokedraft-api
 
   web:
@@ -132,14 +134,14 @@ services:
       - traefik.http.routers.pokedraft-web.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`)
       - traefik.http.routers.pokedraft-web.entrypoints=websecure
       - traefik.http.routers.pokedraft-web.tls.certresolver=letsencrypt
-      - traefik.http.routers.pokedraft-web.priority=10
+      - traefik.http.routers.pokedraft-web.priority=1000
       - traefik.http.routers.pokedraft-web.service=pokedraft-web
       - traefik.http.services.pokedraft-web.loadbalancer.server.port=5173
       # Plain http exists only to redirect. ACME's own router outranks this one,
       # so the certificate challenge still gets through.
       - traefik.http.routers.pokedraft-http.rule=Host(`${APP_DOMAIN:?set APP_DOMAIN}`)
       - traefik.http.routers.pokedraft-http.entrypoints=web
-      - traefik.http.routers.pokedraft-http.priority=1
+      - traefik.http.routers.pokedraft-http.priority=1000
       - traefik.http.routers.pokedraft-http.service=pokedraft-web
       - traefik.http.routers.pokedraft-http.middlewares=pokedraft-https
       - traefik.http.middlewares.pokedraft-https.redirectscheme.scheme=https
