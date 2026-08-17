@@ -5,6 +5,9 @@ import { db } from '../../db'
 import { notFound } from '../../errors'
 import { authPlugin } from '../../plugins/auth'
 import { leaguePlugin, mustUser } from '../../plugins/league'
+import { assertFormat } from '../leagues/service'
+import { buildPool } from './build'
+import { diffAgainst } from './classify'
 import { MAX_BYTES } from './parse'
 import {
   activeList,
@@ -171,5 +174,38 @@ export const pointsModule = new Elysia({ prefix: '/leagues/:id/points', tags: ['
       }),
       response: t.Object({ id: t.String(), version: t.Integer(), entryCount: t.Integer() }),
       detail: { summary: 'Creates a new version — prices are never edited in place.' },
+    },
+  )
+
+/**
+ * The same preview, for a league that does not exist yet: the create form has a
+ * format and a file but no league id. Stateless — it reads the dex, writes
+ * nothing, and returns the hash `POST /leagues` must carry in `pool.hash`.
+ */
+export const poolPreviewModule = new Elysia({ prefix: '/points', tags: ['points'] })
+  .use(authPlugin)
+  .post(
+    '/preview',
+    ({ body }) => {
+      assertFormat(body.formatId)
+      const built = buildPool(body.source, body.formatId, { allowIllegal: body.allowIllegal })
+      return {
+        hash: built.hash,
+        nextVersion: 1,
+        summary: built.summary,
+        // Nothing to diff against yet, so every entry reads as added — the
+        // same shape the league-scoped preview returns.
+        diff: diffAgainst(built.entries, []),
+        rows: built.rows,
+      }
+    },
+    {
+      auth: true,
+      body: t.Composite([
+        SourceBody,
+        t.Object({ formatId: t.String({ minLength: 3, maxLength: 64 }) }),
+      ]),
+      response: PreviewResponse,
+      detail: { summary: 'League-less preview for the create flow. Writes nothing.' },
     },
   )

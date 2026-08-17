@@ -1,7 +1,9 @@
 import { and, type Database, eq, schema, sql } from '@pokedraft/db'
 import { getFormatInfo } from '@pokedraft/dex'
-import { ERROR_CODES } from '@pokedraft/shared'
+import { DEFAULT_SETTINGS, ERROR_CODES, type LeagueSettings } from '@pokedraft/shared'
 import { badRequest, conflict, notFound } from '../../errors'
+import { assertFreshHash, buildPool } from '../points/build'
+import { writePointList } from '../points/repo'
 import { recordAudit } from '../system/service'
 import { alreadyMember, leagueFull, leagueNotFound } from './errors'
 import {
@@ -12,6 +14,7 @@ import {
   findSettings,
   slugExists,
 } from './repo'
+import { resolveSettings } from './settings'
 import { assertStatus, assertTransition, type LeagueStatus } from './status'
 
 const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -45,7 +48,7 @@ async function uniqueSlug(db: Database, name: string): Promise<string> {
   throw conflict(ERROR_CODES.SLUG_TAKEN, 'could not allocate a unique slug')
 }
 
-function assertFormat(formatId: string) {
+export function assertFormat(formatId: string) {
   if (!getFormatInfo(formatId)) {
     throw badRequest(ERROR_CODES.FORMAT_NOT_FOUND, `unknown format: ${formatId}`)
   }
@@ -56,13 +59,29 @@ export type CreateLeagueInput = {
   description?: string
   visibility?: 'public' | 'private'
   formatId: string
-  settings?: Partial<typeof schema.leagueSettings.$inferInsert>
+  settings?: Partial<LeagueSettings>
   teamName?: string
+  /** Optional v1 price list, carrying the hash of the preview the host saw. */
+  pool?: { source: string; hash: string; allowIllegal?: boolean; name?: string }
 }
 
-/** The creator becomes host *and* a playing member — hosts play in these leagues. */
+/**
+ * The creator becomes host *and* a playing member — hosts play in these
+ * leagues. Every rule the draft depends on is decided here: format, pool,
+ * clocks, budget and roster shape all land in one transaction, so a league
+ * never exists in a half-configured state.
+ */
 export async function createLeague(db: Database, userId: string, input: CreateLeagueInput) {
   assertFormat(input.formatId)
+  const settings = resolveSettings(DEFAULT_SETTINGS, input.settings)
+
+  // Built before the transaction opens: a bad file or a stale hash is the
+  // host's mistake, not a reason to have written and rolled back a league.
+  const pool = input.pool
+    ? buildPool(input.pool.source, input.formatId, { allowIllegal: input.pool.allowIllegal })
+    : null
+  if (pool && input.pool) assertFreshHash(pool, input.pool.hash)
+
   const slug = await uniqueSlug(db, input.name)
 
   return db.transaction(async (tx) => {
@@ -79,7 +98,6 @@ export async function createLeague(db: Database, userId: string, input: CreateLe
       .returning()
     if (!league) throw new Error('league insert returned nothing')
 
-    const { leagueId: _ignored, ...settings } = input.settings ?? {}
     await tx.insert(schema.leagueSettings).values({ leagueId: league.id, ...settings })
     await tx.insert(schema.leagueMembers).values({
       leagueId: league.id,
@@ -87,6 +105,17 @@ export async function createLeague(db: Database, userId: string, input: CreateLe
       role: 'host',
       teamName: input.teamName ?? null,
     })
+
+    if (pool) {
+      await writePointList(tx, {
+        leagueId: league.id,
+        version: 1,
+        entries: pool.entries,
+        createdBy: userId,
+        name: input.pool?.name ?? null,
+        rawSource: input.pool?.source ?? null,
+      })
+    }
 
     return league
   })
@@ -152,13 +181,12 @@ const SETTINGS_LOCKED_AFTER_SETUP = [
 export async function updateSettings(
   db: Database,
   leagueId: string,
-  patch: Partial<typeof schema.leagueSettings.$inferInsert>,
+  patch: Partial<LeagueSettings>,
 ) {
   const league = await getLeagueOr404(db, leagueId)
-  const { leagueId: _ignored, ...clean } = patch
 
   if (league.status !== 'setup') {
-    const locked = SETTINGS_LOCKED_AFTER_SETUP.filter((k) => k in clean)
+    const locked = SETTINGS_LOCKED_AFTER_SETUP.filter((k) => k in patch)
     if (locked.length > 0) {
       throw conflict(
         ERROR_CODES.LEAGUE_INVALID_STATUS,
@@ -168,9 +196,15 @@ export async function updateSettings(
     }
   }
 
+  const current = await findSettings(db, leagueId)
+  if (!current) throw leagueNotFound()
+  // Validated against the merged result, so a patch cannot cross a rule that
+  // spans a field it did not touch.
+  const merged = resolveSettings(current, patch)
+
   const [updated] = await db
     .update(schema.leagueSettings)
-    .set(clean)
+    .set(merged)
     .where(eq(schema.leagueSettings.leagueId, leagueId))
     .returning()
   if (!updated) throw leagueNotFound()

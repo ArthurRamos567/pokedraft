@@ -15,6 +15,10 @@ const handler = createStartHandler(defaultStreamHandler)
 const clientDir = resolve(import.meta.dirname, '../client')
 
 async function staticFile(pathname: string): Promise<Response | null> {
+  // Vite's dev server runs this module under Node, where there is no `Bun`
+  // global — and nothing to serve either, since Vite already answered.
+  if (typeof Bun === 'undefined') return null
+
   const decoded = decodeURIComponent(pathname)
   const path = resolve(clientDir, `.${decoded}`)
   // resolve() collapses `..`, so this is what stops a traversal out of the

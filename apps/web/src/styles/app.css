@@ -1066,3 +1066,185 @@ p {
 .band-row:first-child td {
   border-top: 0;
 }
+
+/* ── setup wizard ────────────────────────────────────────────────────────── */
+/* A rail of steps beside the sheet, the way a broadcast rundown is laid out:
+   what is done, what is on air, what is still to come — all visible at once. */
+.wiz {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 208px minmax(0, 1fr);
+  align-items: start;
+}
+
+.wiz-rail {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--line);
+}
+
+.wiz-step {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  text-align: left;
+  color: var(--text-3);
+  cursor: pointer;
+  font: inherit;
+  transition:
+    color 0.14s,
+    border-color 0.14s,
+    background 0.14s;
+}
+.wiz-step:hover:not(:disabled) {
+  color: var(--text-2);
+  background: rgb(255 255 255 / 2%);
+}
+.wiz-step:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.wiz-step i {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+.wiz-step b {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.wiz-step-done {
+  color: var(--text-2);
+}
+.wiz-step-done i {
+  color: var(--good);
+}
+.wiz-step-on {
+  color: var(--text);
+  border-left-color: var(--live);
+  background: linear-gradient(90deg, rgb(255 176 32 / 7%), transparent 70%);
+}
+.wiz-step-on i {
+  color: var(--live);
+}
+
+/* ── segmented control ───────────────────────────────────────────────────── */
+/* Two or three options are a choice, not a list. Show them all rather than
+   hiding them behind a select. */
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--ink-900);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+}
+.seg > button {
+  flex: 1;
+  padding: 7px 10px;
+  background: none;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.14s,
+    color 0.14s;
+}
+.seg > button:hover:not([aria-pressed="true"]) {
+  background: var(--ink-700);
+  color: var(--text);
+}
+.seg > button[aria-pressed="true"] {
+  background: var(--ink-500);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.seg-live > button[aria-pressed="true"] {
+  background: linear-gradient(180deg, #ffc247, var(--live));
+  color: #221701;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* ── the config ticket: the whole league in one scannable slug ───────────── */
+.ticket {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0 14px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.ticket > dt {
+  padding: 6px 0;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-top: 1px solid var(--line);
+}
+.ticket > dd {
+  margin: 0;
+  padding: 6px 0;
+  color: var(--text);
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.ticket > dt:first-child,
+.ticket > dt:first-child + dd {
+  border-top: 0;
+}
+
+@media (max-width: 860px) {
+  .wiz {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wiz-rail {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .wiz-step {
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    margin: 0;
+    white-space: nowrap;
+  }
+  .wiz-step-on {
+    border-bottom-color: var(--live);
+    background: none;
+  }
+}
+
+/* A group of buttons still needs a legend, and a legend needs a fieldset. */
+.field-set {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.field-set > legend {
+  padding: 0;
+  margin-bottom: 6px;
+}

@@ -1,4 +1,6 @@
+import { SETTINGS_LIMITS as L } from '@pokedraft/shared'
 import { t } from 'elysia'
+import { MAX_BYTES } from '../points/parse'
 
 export const Visibility = t.Union([t.Literal('public'), t.Literal('private')])
 export const Status = t.Union([
@@ -19,16 +21,20 @@ export const Role = t.Union([
 export const SettingsSchema = t.Object({
   draftMode: t.Union([t.Literal('live'), t.Literal('async')]),
   draftType: t.Union([t.Literal('snake'), t.Literal('linear')]),
-  pickSeconds: t.Integer(),
-  turnHours: t.Integer(),
-  budget: t.Integer(),
-  rosterMin: t.Integer(),
-  rosterMax: t.Integer(),
+  /** Live drafts: the shot clock per pick. */
+  pickSeconds: t.Integer({ minimum: L.pickSeconds.min, maximum: L.pickSeconds.max }),
+  /** Async drafts: how long a turn may sit before autopick fires. */
+  turnHours: t.Integer({ minimum: L.turnHours.min, maximum: L.turnHours.max }),
+  budget: t.Integer({ minimum: L.budget.min, maximum: L.budget.max }),
+  rosterMin: t.Integer({ minimum: L.roster.min, maximum: L.roster.max }),
+  rosterMax: t.Integer({ minimum: L.roster.min, maximum: L.roster.max }),
   allowUndrafted: t.Boolean(),
-  maxMembers: t.Integer(),
+  maxMembers: t.Integer({ minimum: L.maxMembers.min, maximum: L.maxMembers.max }),
   tradesEnabled: t.Boolean(),
   tradesRequireHostApproval: t.Boolean(),
-  tradeDeadlineWeek: t.Nullable(t.Integer()),
+  tradeDeadlineWeek: t.Nullable(
+    t.Integer({ minimum: L.tradeDeadlineWeek.min, maximum: L.tradeDeadlineWeek.max }),
+  ),
   autopickPolicy: t.Union([
     t.Literal('skip'),
     t.Literal('queue_then_skip'),
@@ -67,6 +73,18 @@ export const MemberSchema = t.Object({
   avatarUrl: t.Nullable(t.String()),
 })
 
+/**
+ * The pool a league starts with, carrying the hash of the preview the host was
+ * shown by `POST /points/preview`. Same preview-then-commit contract as a
+ * mid-setup import, just folded into the create call.
+ */
+export const CreatePoolInput = t.Object({
+  source: t.String({ maxLength: MAX_BYTES }),
+  hash: t.String({ minLength: 64, maxLength: 64 }),
+  allowIllegal: t.Optional(t.Boolean()),
+  name: t.Optional(t.String({ maxLength: 120 })),
+})
+
 export const CreateLeagueBody = t.Object({
   name: t.String({ minLength: 3, maxLength: 80 }),
   description: t.Optional(t.String({ maxLength: 2000 })),
@@ -74,6 +92,7 @@ export const CreateLeagueBody = t.Object({
   formatId: t.String({ minLength: 3, maxLength: 64 }),
   teamName: t.Optional(t.String({ maxLength: 60 })),
   settings: t.Optional(SettingsPatch),
+  pool: t.Optional(CreatePoolInput),
 })
 
 export const UpdateLeagueBody = t.Partial(

@@ -111,13 +111,17 @@ describe('leagues', () => {
   it('refuses to exceed capacity', async () => {
     const host = await signUp()
     const league = await createLeague(host)
-    await call(`/leagues/${league.id}/settings`, {
+    const patched = await call(`/leagues/${league.id}/settings`, {
       method: 'PATCH',
       headers: { cookie: host.cookie, 'content-type': 'application/json' },
-      body: JSON.stringify({ maxMembers: 1 }),
+      body: JSON.stringify({ maxMembers: 2 }),
     })
+    expect(patched.status).toBe(200)
 
     const code = await invite(host, league.id)
+    // The host already fills one of the two seats.
+    expect((await joinWithCode(await signUp(), code)).status).toBe(200)
+
     const player = await signUp()
     const res = await joinWithCode(player, code)
     expect(res.status).toBe(409)
@@ -203,5 +207,142 @@ describe('leagues', () => {
       body: JSON.stringify({ mode: 'manual', order: [members[0]!.id] }),
     })
     expect(res.status).toBe(400)
+  })
+})
+
+describe('setup at creation', () => {
+  const YML = 'Landorus-Therian: 20\nGholdengo: 19\nToxapex: 17\n'
+
+  const previewPool = async (cookie: string, formatId = 'gen9ou', source = YML) => {
+    const res = await call('/points/preview', {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({ source, formatId }),
+    })
+    return {
+      status: res.status,
+      body: (await res.json()) as { hash: string; summary: { ok: number }; diff: { added: [] } },
+    }
+  }
+
+  it('previews a pool before any league exists', async () => {
+    const host = await signUp()
+    const { status, body } = await previewPool(host.cookie)
+    expect(status).toBe(200)
+    expect(body.summary.ok).toBe(3)
+    expect(body.diff.added).toHaveLength(3)
+    expect(body.hash).toHaveLength(64)
+  })
+
+  it('rejects a preview for a format that does not exist', async () => {
+    const host = await signUp()
+    const { status } = await previewPool(host.cookie, 'gen9nonsense')
+    expect(status).toBe(400)
+  })
+
+  it('writes rules and the pool in the same create call', async () => {
+    const host = await signUp()
+    const { body: preview } = await previewPool(host.cookie)
+
+    const league = await createLeague(host, {
+      settings: {
+        draftMode: 'async',
+        draftType: 'linear',
+        pickSeconds: 45,
+        turnHours: 12,
+        budget: 120,
+        rosterMin: 4,
+        rosterMax: 8,
+        maxMembers: 12,
+        allowUndrafted: true,
+        tradesEnabled: true,
+        tradesRequireHostApproval: true,
+        tradeDeadlineWeek: 7,
+        autopickPolicy: 'queue_then_best',
+      },
+      pool: { source: YML, hash: preview.hash, name: 'Season 1 prices' },
+    })
+
+    const view = await call(`/leagues/${league.id}`, { headers: { cookie: host.cookie } })
+    const { settings } = (await view.json()) as {
+      settings: {
+        draftMode: string
+        draftType: string
+        pickSeconds: number
+        turnHours: number
+        budget: number
+        rosterMax: number
+        maxMembers: number
+        tradeDeadlineWeek: number
+        autopickPolicy: string
+      }
+    }
+    expect(settings.draftMode).toBe('async')
+    expect(settings.draftType).toBe('linear')
+    expect(settings.pickSeconds).toBe(45)
+    expect(settings.turnHours).toBe(12)
+    expect(settings.budget).toBe(120)
+    expect(settings.rosterMax).toBe(8)
+    expect(settings.maxMembers).toBe(12)
+    expect(settings.tradeDeadlineWeek).toBe(7)
+    expect(settings.autopickPolicy).toBe('queue_then_best')
+
+    const pool = await call(`/leagues/${league.id}/points`, { headers: { cookie: host.cookie } })
+    const body = (await pool.json()) as {
+      list: { version: number; name: string } | null
+      entries: unknown[]
+    }
+    expect(body.list?.version).toBe(1)
+    expect(body.list?.name).toBe('Season 1 prices')
+    expect(body.entries).toHaveLength(3)
+  })
+
+  it('refuses a stale pool hash and writes no league at all', async () => {
+    const host = await signUp()
+    const { body: preview } = await previewPool(host.cookie)
+
+    const res = await call('/leagues', {
+      method: 'POST',
+      headers: { cookie: host.cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Stale Hash League',
+        formatId: 'gen9ou',
+        pool: { source: `${YML}Kingambit: 18\n`, hash: preview.hash },
+      }),
+    })
+    expect(res.status).toBe(409)
+
+    const mine = await call('/leagues/mine', { headers: { cookie: host.cookie } })
+    expect((await mine.json()) as unknown[]).toHaveLength(0)
+  })
+
+  it('rejects a roster floor above its ceiling', async () => {
+    const host = await signUp()
+    const res = await call('/leagues', {
+      method: 'POST',
+      headers: { cookie: host.cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Impossible Roster',
+        formatId: 'gen9ou',
+        settings: { rosterMin: 10, rosterMax: 6 },
+      }),
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error: { code: string } }
+    expect(body.error.code).toBe('VALIDATION_ERROR')
+  })
+
+  it('rejects a pick clock below the floor', async () => {
+    const host = await signUp()
+    const res = await call('/leagues', {
+      method: 'POST',
+      headers: { cookie: host.cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Instant Clock',
+        formatId: 'gen9ou',
+        settings: { pickSeconds: 3 },
+      }),
+    })
+    expect(res.status).toBe(422)
   })
 })
